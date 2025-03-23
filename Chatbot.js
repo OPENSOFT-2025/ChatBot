@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaPaperPlane, FaArrowDown, FaSmile, FaPaperclip, FaMicrophone } from "react-icons/fa";
+import { FaPaperPlane, FaArrowDown, FaMicrophone } from "react-icons/fa";
 
 function Chatbot() {
   const [messages, setMessages] = useState([
@@ -10,6 +10,7 @@ function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [dots, setDots] = useState(".");
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isInputActive, setIsInputActive] = useState(false);
   const chatBoxRef = useRef(null);
   const inputRef = useRef(null);
   const previousScrollHeightRef = useRef(0);
@@ -61,6 +62,7 @@ function Chatbot() {
     setMessages([...messages, { text: input, sender: "user" }]);
     setInput("");
     setIsTyping(true);
+    setIsInputActive(false);
 
     setTimeout(() => {
       setMessages((prevMessages) => [
@@ -72,16 +74,21 @@ function Chatbot() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSendMessage();
     }
   };
 
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+    setIsInputActive(e.target.value.length > 0);
+  };
+
   const scrollToBottom = () => {
     if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTo({ 
-        top: chatBoxRef.current.scrollHeight, 
-        behavior: "smooth" 
+      chatBoxRef.current.scrollTo({
+        top: chatBoxRef.current.scrollHeight,
+        behavior: "smooth",
       });
     }
   };
@@ -90,25 +97,48 @@ function Chatbot() {
     return name.charAt(0).toUpperCase();
   };
 
-  const handleEmojiClick = () => {
-    console.log("Emoji icon clicked! Add your emoji picker logic here.");
-  };
-
-  const handleAttachmentClick = () => {
-    console.log("Attachment icon clicked! Add your file upload logic here.");
-  };
-
   const handleMicClick = () => {
     console.log("Microphone icon clicked! Add your voice input logic here.");
   };
 
   return (
     <div style={styles.pageContainer}>
-      {/* Add CSS for the hover effect */}
       <style>
         {`
           .icon-wrapper:hover {
-            border: 2px solid #26890d !important; /* Green border on hover */
+            border: 2px solid #26890d !important;
+          }
+          .mic-wrapper:hover {
+            background-color: #26890d;
+            border-radius: 50%;
+          }
+          /* Webkit browsers (Chrome, Safari, Edge) */
+          .chat-box::-webkit-scrollbar {
+            width: 8px !important;
+          }
+          .chat-box::-webkit-scrollbar-track {
+            background: #131313 !important; /* Force black background */
+            border-radius: 4px !important;
+            box-shadow: none !important;
+          }
+          .chat-box::-webkit-scrollbar-thumb {
+            background: #333 !important;
+            border-radius: 4px !important;
+          }
+          .chat-box::-webkit-scrollbar-thumb:hover {
+            background: #555 !important;
+          }
+          .chat-box::-webkit-scrollbar-button {
+            display: none !important; /* Hide scrollbar buttons */
+          }
+          /* Firefox */
+          .chat-box {
+            scrollbar-width: thin !important;
+            scrollbar-color: #333 #131313 !important; /* Thumb #333, track #131313 (black) */
+          }
+          /* Ensure the container itself doesn't interfere */
+          .chat-box {
+            background: #131313 !important; /* Match the background to the track */
           }
         `}
       </style>
@@ -125,56 +155,62 @@ function Chatbot() {
           </div>
         </div>
 
-        <div style={styles.chatBox} ref={chatBoxRef}>
+        <div style={{ ...styles.chatBox, className: "chat-box" }} ref={chatBoxRef}>
           {messages.map((msg, index) => (
-            <div key={index} style={{
-              ...styles.messageRow,
-              justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
-            }}>
-              {msg.sender === "bot" && 
+            <div
+              key={index}
+              style={{
+                ...styles.messageRow,
+                justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
+              }}
+            >
+              {msg.sender === "bot" && (
                 <div style={styles.botAvatar}>
                   <div style={styles.avatar}>A</div>
                 </div>
-              }
-              <div style={{
-                position: "relative",
-                maxWidth: msg.sender === "bot" ? "50%" : "60%"
-              }}>
+              )}
+              <div
+                style={{
+                  ...styles.messageContainer,
+                  maxWidth: msg.sender === "bot" ? "50%" : "60%",
+                }}
+              >
                 <div style={msg.sender === "user" ? styles.userMsg : styles.botMsg}>
                   {msg.text}
                   {index === messages.length - 1 && msg.sender === "bot" && (
                     <div style={styles.timestamp}>5:55 PM</div>
                   )}
                 </div>
-                <div style={
-                  msg.sender === "user" 
-                    ? styles.userMsgTail 
-                    : styles.botMsgTail
-                }></div>
+                <div
+                  style={msg.sender === "user" ? styles.userMsgTail : styles.botMsgTail}
+                ></div>
               </div>
+              {msg.sender === "user" && (
+                <div style={styles.userAvatar}>
+                  <div style={styles.avatar}>U</div>
+                </div>
+              )}
             </div>
           ))}
-          {isTyping && 
+          {isTyping && (
             <div style={styles.messageRow}>
               <div style={styles.botAvatar}>
                 <div style={styles.avatar}>A</div>
               </div>
-              <div style={{ position: "relative" }}>
+              <div style={styles.messageContainer}>
                 <div style={styles.typingIndicator}>Typing{dots}</div>
                 <div style={styles.botMsgTail}></div>
               </div>
             </div>
-          }
+          )}
 
           {messages.length === 2 && (
             <div style={styles.optionsContainer}>
               <button style={styles.optionButton}>
                 An AI chatbot to suggest products, generate leads, or handle customer inquiries
               </button>
-              <button style={styles.optionButton}>
-                Omnichannel business messaging
-              </button>
-              <button style={{...styles.optionButton, ...styles.activeOptionButton}}>
+              <button style={styles.optionButton}>Omnichannel business messaging</button>
+              <button style={{ ...styles.optionButton, ...styles.activeOptionButton }}>
                 Secure and scalable in-app chat
               </button>
             </div>
@@ -188,28 +224,36 @@ function Chatbot() {
         )}
 
         <div style={styles.inputContainer}>
-          <div style={styles.iconWrapper} className="icon-wrapper">
-            <FaSmile onClick={handleEmojiClick} style={styles.inputIcon} />
+          <div style={styles.inputWrapper}>
+            <input
+              type="text"
+              style={{
+                ...styles.input,
+                border: isInputActive ? "1px solid #26890d" : "1px solid #333",
+              }}
+              value={input}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              ref={inputRef}
+            />
+            <FaPaperPlane
+              onClick={handleSendMessage}
+              style={{
+                ...styles.actionIcon,
+                color: isInputActive ? "#26890d" : "#fff",
+                position: "absolute",
+                right: "15px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            />
           </div>
-          <div style={styles.iconWrapper} className="icon-wrapper">
-            <FaPaperclip onClick={handleAttachmentClick} style={styles.inputIcon} />
-          </div>
-          
-          <input
-            type="text"
-            style={styles.input}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
-            ref={inputRef}
-          />
-          
-          <div style={styles.iconWrapper} className="icon-wrapper">
-            <FaPaperPlane onClick={handleSendMessage} style={styles.actionIcon} />
-          </div>
-          <div style={styles.iconWrapper} className="icon-wrapper">
-            <FaMicrophone onClick={handleMicClick} style={styles.actionIcon} />
+          <div style={styles.iconWrapper} className="mic-wrapper">
+            <FaMicrophone
+              onClick={handleMicClick}
+              style={{ ...styles.actionIcon, color: "#fff" }}
+            />
           </div>
         </div>
       </div>
@@ -226,14 +270,14 @@ const styles = {
     alignItems: "center",
     background: "#131313",
   },
-  container: { 
+  container: {
     width: "370px",
     height: "600px",
-    margin: "auto", 
-    fontFamily: "Arial, sans-serif", 
+    margin: "auto",
+    fontFamily: "Arial, sans-serif",
     position: "relative",
-    border: "1px solid #333", 
-    borderRadius: "20px", 
+    border: "1px solid #333",
+    borderRadius: "20px",
     backgroundColor: "#252525",
     boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
     display: "flex",
@@ -279,10 +323,10 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
   },
-  chatBox: { 
+  chatBox: {
     flex: 1,
-    overflowY: "auto", 
-    padding: "15px", 
+    overflowY: "auto",
+    padding: "15px",
     position: "relative",
     backgroundColor: "#131313",
     display: "flex",
@@ -297,6 +341,14 @@ const styles = {
   botAvatar: {
     marginRight: "8px",
     alignSelf: "flex-start",
+  },
+  userAvatar: {
+    marginLeft: "8px",
+    alignSelf: "flex-start",
+  },
+  messageContainer: {
+    position: "relative",
+    marginTop: "20px",
   },
   userMsg: {
     backgroundColor: "#005C4B",
@@ -351,9 +403,9 @@ const styles = {
     fontSize: "10px",
     color: "#999",
   },
-  typingIndicator: { 
+  typingIndicator: {
     backgroundColor: "#333",
-    color: "#26890d", 
+    color: "#26890d",
     padding: "8px 15px",
     borderRadius: "18px",
     fontSize: "14px",
@@ -381,47 +433,45 @@ const styles = {
     backgroundColor: "#26890d",
     color: "white",
   },
-  inputContainer: { 
-    display: "flex", 
-    alignItems: "center", 
-    padding: "10px", // Adjusted padding to 10px on all sides
+  inputContainer: {
+    display: "flex",
+    alignItems: "center",
+    padding: "10px",
     borderTop: "1px solid #333",
     backgroundColor: "#252525",
+    justifyContent: "space-between",
   },
-  input: { 
-    flex: 1, 
-    padding: "12px 15px", 
-    border: "1px solid #333", 
-    borderRadius: "20px", 
-    outline: "none", 
+  inputWrapper: {
+    position: "relative",
+    flex: 1,
+    marginRight: "10px",
+  },
+  input: {
+    padding: "12px 40px 12px 15px",
+    borderRadius: "20px",
+    outline: "none",
     fontSize: "14px",
     backgroundColor: "#131313",
     color: "white",
     transition: "all 0.3s ease",
+    width: "100%",
+    boxSizing: "border-box",
   },
-  inputIcon: {
-    fontSize: "18px", // Reduced icon size
-    color: "#fff",
-    cursor: "pointer",
-  },
-  actionIcon: { 
-    fontSize: "18px", // Reduced icon size
-    color: "#fff",
+  actionIcon: {
+    fontSize: "18px",
     cursor: "pointer",
   },
   iconWrapper: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    width: "28px", // Reduced size to fit smaller icons
+    width: "28px",
     height: "28px",
-    border: "2px solid transparent", // Default transparent border
-    transition: "border 0.2s ease", // Smooth transition for border
-    marginRight: "8px", // Reduced spacing
-    marginLeft: "8px", // Reduced spacing
+    border: "2px solid transparent",
+    transition: "border 0.2s ease",
   },
   scrollToBottomButton: {
-    position: "absolute", 
+    position: "absolute",
     bottom: "100px",
     right: "20px",
     width: "40px",
@@ -441,4 +491,4 @@ const styles = {
   },
 };
 
-export default Chatbot;
+export default Chatbot;
