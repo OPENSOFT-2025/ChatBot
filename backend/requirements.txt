@@ -1,0 +1,38 @@
+# JWT and Authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4     
+
+# Database (if you plan to add persistence for logging and reporting)
+SQLAlchemy>=1.4.0
+psycopg2-binary>=2.9.5
+
+# Optional: For asynchronous database operations, e.g., with databases or asyncpg (if using PostgreSQL)
+databases>=0.5.5
+
+# Other utilities
+requests>=2.0.0
+
+google-generativeai
+python-dotenv>=0.21.0
+
+
+
+# FastAPI web framework and ASGI server
+fastapi>=0.115.11
+uvicorn>=0.34.0
+
+# SQLAlchemy for ORM (database interactions)
+SQLAlchemy>=1.4.0
+
+# JWT creation and validation
+python-jose[cryptography]>=3.3.0
+
+# Password hashing (using bcrypt via Passlib)
+passlib[bcrypt]>=1.7.4
+
+# Environment variable management
+python-dotenv>=1.0.1
+
+# Pydantic Settings (for configuration management)
+pydantic-settings>=2.8.1
+
