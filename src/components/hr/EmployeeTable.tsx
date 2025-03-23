@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +13,31 @@ const employees = [
   { id: 5, name: 'Robert Taylor', position: 'System Analyst', flagged: true },
 ];
 
-export function EmployeeTable() {
+interface EmployeeTableProps {
+  searchQuery?: string;
+}
+
+export function EmployeeTable({ searchQuery = '' }: EmployeeTableProps) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
+  const filteredEmployees = useMemo(() => {
+    if (!searchQuery) return employees;
+    
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return employees.filter(
+      employee => 
+        employee.id.toString().includes(lowerCaseQuery) || 
+        employee.name.toLowerCase().includes(lowerCaseQuery)
+    );
+  }, [searchQuery]);
+
+  const filteredFlaggedEmployees = useMemo(() => {
+    return filteredEmployees.filter(e => e.flagged);
+  }, [filteredEmployees]);
+
+  const filteredUnflaggedEmployees = useMemo(() => {
+    return filteredEmployees.filter(e => !e.flagged);
+  }, [filteredEmployees]);
 
   return (
     <Card className="shadow-card bg-card border border-hr-green/20">
@@ -49,32 +72,40 @@ export function EmployeeTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
-                  <TableRow 
-                    key={employee.id}
-                    className="transition-colors duration-200 border-hr-green/10"
-                    onMouseEnter={() => setHoveredRow(employee.id)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    style={{
-                      backgroundColor: hoveredRow === employee.id ? 'rgba(134, 188, 37, 0.1)' : 'transparent'
-                    }}
-                  >
-                    <TableCell className="font-medium text-muted-foreground">{employee.id}</TableCell>
-                    <TableCell className="text-white">{employee.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{employee.position}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge 
-                        variant={employee.flagged ? "destructive" : "outline"}
-                        className={`
-                          transition-all duration-200 
-                          ${employee.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}
-                        `}
-                      >
-                        {employee.flagged ? 'Flagged' : 'Unflagged'}
-                      </Badge>
+                {filteredEmployees.length > 0 ? (
+                  filteredEmployees.map((employee) => (
+                    <TableRow 
+                      key={employee.id}
+                      className="transition-colors duration-200 border-hr-green/10"
+                      onMouseEnter={() => setHoveredRow(employee.id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                      style={{
+                        backgroundColor: hoveredRow === employee.id ? 'rgba(134, 188, 37, 0.1)' : 'transparent'
+                      }}
+                    >
+                      <TableCell className="font-medium text-muted-foreground">{employee.id}</TableCell>
+                      <TableCell className="text-white">{employee.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{employee.position}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge 
+                          variant={employee.flagged ? "destructive" : "outline"}
+                          className={`
+                            transition-all duration-200 
+                            ${employee.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}
+                          `}
+                        >
+                          {employee.flagged ? 'Flagged' : 'Unflagged'}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                      No employees found matching your search
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TabsContent>
@@ -90,29 +121,37 @@ export function EmployeeTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.filter(e => e.flagged).map((employee) => (
-                  <TableRow 
-                    key={employee.id}
-                    className="transition-colors duration-200 border-hr-green/10"
-                    onMouseEnter={() => setHoveredRow(employee.id)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    style={{
-                      backgroundColor: hoveredRow === employee.id ? 'rgba(134, 188, 37, 0.1)' : 'transparent'
-                    }}
-                  >
-                    <TableCell className="font-medium text-muted-foreground">{employee.id}</TableCell>
-                    <TableCell className="text-white">{employee.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{employee.position}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge 
-                        variant="destructive"
-                        className="bg-destructive/20 text-destructive border-destructive/30"
-                      >
-                        Flagged
-                      </Badge>
+                {filteredFlaggedEmployees.length > 0 ? (
+                  filteredFlaggedEmployees.map((employee) => (
+                    <TableRow 
+                      key={employee.id}
+                      className="transition-colors duration-200 border-hr-green/10"
+                      onMouseEnter={() => setHoveredRow(employee.id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                      style={{
+                        backgroundColor: hoveredRow === employee.id ? 'rgba(134, 188, 37, 0.1)' : 'transparent'
+                      }}
+                    >
+                      <TableCell className="font-medium text-muted-foreground">{employee.id}</TableCell>
+                      <TableCell className="text-white">{employee.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{employee.position}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge 
+                          variant="destructive"
+                          className="bg-destructive/20 text-destructive border-destructive/30"
+                        >
+                          Flagged
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                      No flagged employees found matching your search
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TabsContent>

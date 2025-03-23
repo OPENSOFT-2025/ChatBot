@@ -4,13 +4,11 @@ import { PieChart as RechartsPC, Pie, Cell, ResponsiveContainer, Legend, Tooltip
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const data = [
-  { name: 'Active', value: 540, color: '#0EA5E9' },
-  { name: 'On Leave', value: 120, color: '#F97316' },
-  { name: 'Remote', value: 240, color: '#8B5CF6' },
-  { name: 'Contract', value: 90, color: '#10B981' }
+  { name: 'Unflagged', value: 790, color: '#86BC25' },
+  { name: 'Flagged', value: 210, color: '#E11D48' }
 ];
 
-const COLORS = ['#0EA5E9', '#F97316', '#8B5CF6', '#10B981'];
+const COLORS = ['#86BC25', '#E11D48'];
 
 export function HRPieChart() {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -19,10 +17,15 @@ export function HRPieChart() {
     setIsAnimating(true);
   }, []);
 
+  const renderColorfulLegendText = (value: string, entry: any) => {
+    const color = entry.color;
+    return <span style={{ color: color, fontWeight: 'bold' }}>{value}</span>;
+  };
+
   return (
     <Card className={`shadow-card overflow-hidden ${isAnimating ? 'chart-appear' : ''}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium text-gray-800">Employee Status</CardTitle>
+        <CardTitle className="text-[1.15rem] font-bold text-gray-200">Employee Flag Status</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -48,10 +51,11 @@ export function HRPieChart() {
               <Tooltip 
                 formatter={(value, name) => [`${value} employees`, name]}
                 contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  backgroundColor: 'rgba(20, 20, 20, 0.95)',
                   borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  border: 'none'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  border: 'none',
+                  color: '#f0f0f0'
                 }}
               />
               <Legend 
@@ -60,6 +64,7 @@ export function HRPieChart() {
                 align="center"
                 iconType="circle"
                 iconSize={10}
+                formatter={renderColorfulLegendText}
               />
             </RechartsPC>
           </ResponsiveContainer>

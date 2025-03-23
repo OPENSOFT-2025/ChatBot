@@ -6,13 +6,15 @@ import { Sidebar } from "@/components/hr/Sidebar";
 import { EmployeeTable } from "@/components/hr/EmployeeTable";
 import { EmployeeReports } from "@/components/hr/EmployeeReports";
 import { StatsCard } from "@/components/hr/StatsCard";
-import { Users, FileText, CalendarDays, Clock, BarChart as BarChartIcon, BrainCircuit } from "lucide-react";
+import { Users, FileText, CalendarDays, Clock, BarChart as BarChartIcon, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const analyticsRef = useRef<HTMLDivElement>(null);
   const reportsRef = useRef<HTMLDivElement>(null);
 
@@ -38,48 +40,8 @@ const Index = () => {
           <div id="analytics-section" ref={analyticsRef} className="space-y-6">
             <h2 className="text-2xl font-bold text-hr-green mb-4 flex items-center gap-2">
               <BarChartIcon size={24} className="text-hr-green" />
-              Vibemeter Dashboard
+              ANALYTICS DASHBOARD
             </h2>
-
-            <Card className="bg-hr-black border border-hr-green/20 shadow-md mb-6">
-              <CardHeader>
-                <CardTitle className="text-hr-green flex items-center gap-2">
-                  <BrainCircuit size={20} />
-                  Vibemeter AI Challenge
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-gray-300 space-y-4 max-h-[300px] overflow-y-auto hr-custom-scrollbar">
-                <p>
-                  In large organizations, tracking employee well-being and engagement is essential for 
-                  maintaining productivity and a positive work culture. The Vibemeter tracks the mood 
-                  of employees in 5 different zones, from lowest to highest - <span className="text-red-500 font-medium">Frustrated</span>, 
-                  <span className="text-orange-400 font-medium"> Sad</span>, <span className="text-blue-400 font-medium">Okay</span>, 
-                  <span className="text-green-400 font-medium"> Happy</span>, <span className="text-hr-green font-bold"> Excited</span>.
-                </p>
-                <p>
-                  This helps us do a daily check on the culture, and provide actionable feedback to 
-                  managers, teams and business units to engage employees more effectively, keeping them happy.
-                </p>
-                <p className="font-medium text-hr-green">Our Current Data Analysis Process:</p>
-                <ol className="list-decimal pl-5 space-y-2">
-                  <li>
-                    <span className="font-medium">Data Analysis:</span> We connect Vibemeter data to several other input sources
-                    (performance, leaves, activity tracker, promotions) to identify core employee issues.
-                  </li>
-                  <li>
-                    <span className="font-medium">Post-analysis Feedback:</span> We gather feedback via individual meetings and focus groups.
-                  </li>
-                </ol>
-                <p className="text-hr-green font-medium">Our AI Solution Aims To:</p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Connect with employees to understand their concerns</li>
-                  <li>Gather and correlate data from multiple sources</li>
-                  <li>Provide personalized responses to employee situations</li>
-                  <li>Analyze feedback and escalate serious concerns when needed</li>
-                  <li>Create detailed reports for the People Experience team</li>
-                </ul>
-              </CardContent>
-            </Card>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
               <StatsCard 
@@ -126,6 +88,18 @@ const Index = () => {
             </div>
             
             <div className={`${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+              <div className="mb-4 flex items-center">
+                <div className="relative w-full max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input 
+                    className="pl-10 bg-hr-black border-hr-green/30 focus-visible:ring-hr-green/50"
+                    placeholder="Search by employee ID or name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              
               <Tabs defaultValue="flagged" className="w-full">
                 <TabsList className="grid w-[200px] grid-cols-2 mb-4">
                   <TabsTrigger value="flagged" className="data-[state=active]:bg-hr-green data-[state=active]:text-black">
@@ -136,10 +110,10 @@ const Index = () => {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="flagged">
-                  <EmployeeTable />
+                  <EmployeeTable searchQuery={searchQuery} />
                 </TabsContent>
                 <TabsContent value="unflagged">
-                  <EmployeeTable />
+                  <EmployeeTable searchQuery={searchQuery} />
                 </TabsContent>
               </Tabs>
             </div>
@@ -153,6 +127,18 @@ const Index = () => {
             </h2>
             
             <div className={`${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.7s' }}>
+              <div className="mb-4 flex items-center">
+                <div className="relative w-full max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input 
+                    className="pl-10 bg-hr-black border-hr-green/30 focus-visible:ring-hr-green/50"
+                    placeholder="Search by employee ID or name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              
               <Tabs defaultValue="flagged" className="w-full">
                 <TabsList className="grid w-[200px] grid-cols-2 mb-4">
                   <TabsTrigger value="flagged" className="data-[state=active]:bg-hr-green data-[state=active]:text-black">
@@ -163,10 +149,10 @@ const Index = () => {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="flagged">
-                  <EmployeeReports />
+                  <EmployeeReports searchQuery={searchQuery} />
                 </TabsContent>
                 <TabsContent value="unflagged">
-                  <EmployeeReports />
+                  <EmployeeReports searchQuery={searchQuery} />
                 </TabsContent>
               </Tabs>
             </div>

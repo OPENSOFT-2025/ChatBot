@@ -29,10 +29,15 @@ export function HRBarChart() {
     setIsAnimating(true);
   }, []);
 
+  const renderColorfulLegendText = (value: string, entry: any) => {
+    const color = entry.color;
+    return <span style={{ color: color, fontWeight: 'bold' }}>{value}</span>;
+  };
+
   return (
     <Card className={`shadow-card overflow-hidden ${isAnimating ? 'chart-appear' : ''}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium text-gray-200">Employee Vibemeter Trends</CardTitle>
+        <CardTitle className="text-[1.15rem] font-bold text-gray-200">Employee Vibemeter Trends</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -67,11 +72,13 @@ export function HRBarChart() {
                   border: 'none',
                   color: '#f0f0f0'
                 }}
+                formatter={(value, name) => [value, name]}
               />
               <Legend 
                 iconType="circle" 
                 iconSize={8}
                 wrapperStyle={{ paddingTop: '10px' }}
+                formatter={renderColorfulLegendText}
               />
               <Bar 
                 name="Excited" 
