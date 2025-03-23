@@ -11,6 +11,7 @@ interface StatsCardProps {
   trend?: 'up' | 'down' | 'neutral';
   className?: string;
   style?: React.CSSProperties;
+  content?: React.ReactNode;
 }
 
 export function StatsCard({ 
@@ -20,7 +21,8 @@ export function StatsCard({
   icon, 
   trend = 'neutral',
   className,
-  style
+  style,
+  content
 }: StatsCardProps) {
   return (
     <Card 
@@ -37,16 +39,22 @@ export function StatsCard({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold">{value}</div>
-        {description && (
-          <p className={cn(
-            "mt-1 text-xs",
-            trend === 'up' && "text-green-600",
-            trend === 'down' && "text-red-600",
-            trend === 'neutral' && "text-muted-foreground"
-          )}>
-            {description}
-          </p>
+        {!content ? (
+          <>
+            <div className="text-2xl font-semibold">{value}</div>
+            {description && (
+              <p className={cn(
+                "mt-1 text-xs",
+                trend === 'up' && "text-green-600",
+                trend === 'down' && "text-red-600",
+                trend === 'neutral' && "text-muted-foreground"
+              )}>
+                {description}
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="text-sm">{content}</div>
         )}
       </CardContent>
     </Card>
