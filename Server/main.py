@@ -3,5 +3,5 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-app = FastAPI
+app = FastAPI()
 
