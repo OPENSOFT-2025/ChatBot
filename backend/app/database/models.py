@@ -9,7 +9,7 @@ class Employee(Base):
     
     employee_id = Column(String, primary_key=True, index=True)                   # Employee ID provided as string
     employee_name = Column(String, default="")                          # Default: empty string.
-    employee_email = Column(String, index=True, nullable=False)     
+    employee_email = Column(String, index=True, default="")
     password = Column(String, default="")                           # Hashed password.
     is_selected = Column(Boolean, default=False)                        # Default: not selected for conversation.
     shap_values = Column(MutableList.as_mutable(JSON), default=[])      # Default: empty list.
