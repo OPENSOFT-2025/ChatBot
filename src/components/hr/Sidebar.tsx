@@ -1,12 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   BarChart, 
   FileText, 
   LogOut, 
   User,
   Menu,
-  LucideIcon
+  LucideIcon,
+  Briefcase,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,10 +22,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const [activeSection, setActiveSection] = useState<string>('analytics-section');
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+      setActiveSection(id);
     }
   };
 
@@ -36,7 +42,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="flex items-center justify-between p-4">
         {!collapsed && (
           <div className="font-semibold text-lg text-hr-green animate-fade-in">
-            HR Dashboard
+            Vibemeter HR
           </div>
         )}
         <Button 
@@ -55,13 +61,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <NavItem 
           icon={BarChart} 
           label="Analytics" 
-          active 
+          active={activeSection === 'analytics-section'} 
           collapsed={collapsed} 
           onClick={() => scrollToSection('analytics-section')}
         />
         <NavItem 
           icon={FileText} 
           label="Reports" 
+          active={activeSection === 'reports-section'} 
           collapsed={collapsed} 
           onClick={() => scrollToSection('reports-section')}
         />
@@ -71,32 +78,52 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       
       <div className="p-4">
         <div className={cn(
-          "flex flex-col items-center rounded-lg bg-hr-green/10 p-4 transition-all duration-300",
+          "flex flex-col items-center rounded-lg bg-hr-green/10 p-4 transition-all duration-300 hover:bg-hr-green/20",
           collapsed ? "py-2" : "py-4"
         )}>
-          <Avatar className={cn("h-16 w-16 border-2 border-hr-green shadow-lg mb-4", collapsed && "h-10 w-10 mb-2")}>
+          <Avatar className={cn("h-20 w-20 border-2 border-hr-green shadow-lg mb-4", collapsed && "h-10 w-10 mb-2")}>
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback className="bg-hr-green text-black font-semibold">JD</AvatarFallback>
           </Avatar>
           
           {!collapsed && (
-            <div className="text-center space-y-1 animate-fade-in">
-              <div className="font-semibold text-white">John Doe</div>
-              <div className="text-xs text-hr-green font-medium">HR Manager</div>
-              <div className="text-xs text-gray-400">ID: HR-2024-001</div>
+            <div className="text-center space-y-3 animate-fade-in w-full">
+              <div className="font-semibold text-hr-green text-lg">John Doe</div>
+              <div className="text-sm text-gray-200 font-medium bg-hr-green/20 py-1 px-2 rounded-md">HR Manager</div>
+              
+              <div className="space-y-2 pt-2 text-left">
+                <div className="flex items-center gap-2 text-xs text-gray-300">
+                  <Briefcase size={14} className="text-hr-green" />
+                  <span>ID: HR-2024-001</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-300">
+                  <Mail size={14} className="text-hr-green" />
+                  <span>john.doe@company.com</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-300">
+                  <Phone size={14} className="text-hr-green" />
+                  <span>+1 (555) 123-4567</span>
+                </div>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                className="w-full mt-2 justify-center gap-2 text-hr-green border-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
+              >
+                <LogOut size={16} />
+                <span>Log Out</span>
+              </Button>
             </div>
           )}
           
-          <Button 
-            variant="ghost" 
-            className={cn(
-              "w-full mt-4 justify-center gap-2 text-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200",
-              collapsed && "p-2"
-            )}
-          >
-            <LogOut size={16} />
-            {!collapsed && <span>Log Out</span>}
-          </Button>
+          {collapsed && (
+            <Button 
+              variant="ghost" 
+              className="p-2 mt-2 justify-center text-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
+            >
+              <LogOut size={16} />
+            </Button>
+          )}
         </div>
       </div>
     </div>

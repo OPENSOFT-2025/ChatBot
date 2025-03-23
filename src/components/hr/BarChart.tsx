@@ -12,13 +12,14 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Updated data to reflect Vibemeter emotional states
 const data = [
-  { month: 'Jan', hired: 12, separated: 8 },
-  { month: 'Feb', hired: 19, separated: 5 },
-  { month: 'Mar', hired: 15, separated: 7 },
-  { month: 'Apr', hired: 20, separated: 4 },
-  { month: 'May', hired: 18, separated: 6 },
-  { month: 'Jun', hired: 22, separated: 9 },
+  { month: 'Jan', Excited: 22, Happy: 35, Okay: 18, Sad: 15, Frustrated: 10 },
+  { month: 'Feb', Excited: 25, Happy: 38, Okay: 15, Sad: 12, Frustrated: 8 },
+  { month: 'Mar', Excited: 18, Happy: 30, Okay: 22, Sad: 18, Frustrated: 12 },
+  { month: 'Apr', Excited: 28, Happy: 40, Okay: 16, Sad: 10, Frustrated: 6 },
+  { month: 'May', Excited: 24, Happy: 36, Okay: 20, Sad: 12, Frustrated: 8 },
+  { month: 'Jun', Excited: 30, Happy: 42, Okay: 14, Sad: 8, Frustrated: 6 },
 ];
 
 export function HRBarChart() {
@@ -31,7 +32,7 @@ export function HRBarChart() {
   return (
     <Card className={`shadow-card overflow-hidden ${isAnimating ? 'chart-appear' : ''}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium text-gray-800">Hiring Trends</CardTitle>
+        <CardTitle className="text-xl font-medium text-gray-200">Employee Vibemeter Trends</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -46,24 +47,25 @@ export function HRBarChart() {
               }}
               barGap={8}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f1f1" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
               <XAxis 
                 dataKey="month" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: '#888', fontSize: 12 }}
+                tick={{ fill: '#bbb', fontSize: 12 }}
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: '#888', fontSize: 12 }}
+                tick={{ fill: '#bbb', fontSize: 12 }}
               />
               <Tooltip
                 contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  backgroundColor: 'rgba(20, 20, 20, 0.95)',
                   borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  border: 'none'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  border: 'none',
+                  color: '#f0f0f0'
                 }}
               />
               <Legend 
@@ -72,20 +74,44 @@ export function HRBarChart() {
                 wrapperStyle={{ paddingTop: '10px' }}
               />
               <Bar 
-                name="New Hires" 
-                dataKey="hired" 
-                fill="#0EA5E9" 
+                name="Excited" 
+                dataKey="Excited" 
+                fill="#86BC25" 
                 radius={[4, 4, 0, 0]} 
                 animationDuration={1000}
                 animationBegin={200}
               />
               <Bar 
-                name="Separations" 
-                dataKey="separated" 
-                fill="#F97316" 
-                radius={[4, 4, 0, 0]}
+                name="Happy" 
+                dataKey="Happy" 
+                fill="#9FD356" 
+                radius={[4, 4, 0, 0]} 
+                animationDuration={1000}
+                animationBegin={300}
+              />
+              <Bar 
+                name="Okay" 
+                dataKey="Okay" 
+                fill="#33C3F0" 
+                radius={[4, 4, 0, 0]} 
                 animationDuration={1000}
                 animationBegin={400}
+              />
+              <Bar 
+                name="Sad" 
+                dataKey="Sad" 
+                fill="#F97316" 
+                radius={[4, 4, 0, 0]} 
+                animationDuration={1000}
+                animationBegin={500}
+              />
+              <Bar 
+                name="Frustrated" 
+                dataKey="Frustrated" 
+                fill="#E11D48" 
+                radius={[4, 4, 0, 0]} 
+                animationDuration={1000}
+                animationBegin={600}
               />
             </RechartsBC>
           </ResponsiveContainer>
