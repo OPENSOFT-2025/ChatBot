@@ -18,6 +18,17 @@ def parse_int(value: str) -> int:
         return int(value)
     except (ValueError, TypeError):
         return 0
+    
+def parse_shap_values(value: str):
+    """
+    Parse comma-separated feature names into a list of strings.
+    e.g. "Performance_Rating,Promotion_Consideration,Leave_Type"
+    -> ["Performance_Rating", "Promotion_Consideration", "Leave_Type"]
+    """
+    if not value:
+        return []
+    # Split by comma and strip whitespace
+    return [item.strip() for item in value.split(",")]
 
 def ingest_csv_data(file_content: bytes, table: str, db: Session):
     """
@@ -35,22 +46,31 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
             if not employee_id:
                 raise ValueError("Missing employee_id")
             # Map CSV columns to fixed fields in the Employee model
+
+            shap_str = row.get("shap_values", "")
+            shap_list = parse_shap_values(shap_str)
+
             employee = Employee(
-                id=row.get("employee_id"),
-                employee_name=row.get("employee_name", ""),
-                employee_email=row.get("employee_email"),
-                password=hash_password(row.get("password")),
-                role=row.get("role", "employee"),
-                report=row.get("report", ""),
+                employee_id=row.get("employee_id"),
+                shap_values=shap_list,
+                # employee_name=row.get("employee_name", ""),
+                # employee_email=row.get("employee_email"),
+                # password=hash_password(row.get("password")),
+                # role=row.get("role", "employee"),
+                # report=row.get("report", ""),
                 sentimental_score=parse_int(row.get("sentimental_score", "0")),
-                is_resolved=parse_bool(row.get("is_resolved", "false")),
-                # Fixed feature columns
+                # is_resolved=parse_bool(row.get("is_resolved", "false")),
+
                 work_hours=parse_float(row.get("work_hours", "0.0")),
                 leave_days=parse_int(row.get("leave_days", "0")),
+                leave_type=row.get("leave_type", ""),
                 performance_rating=parse_int(row.get("performance_rating", "0")),
+                manager_feedback=row.get("manager_feedback", ""),
                 promotion_consideration=parse_bool(row.get("promotion_consideration", "false")),
                 reward_points=parse_int(row.get("reward_points", "0")),
-                team_messages_sent=parse_int(row.get("team_messages_sent", "0"))
+                award_type=row.get("award_type", ""),
+                team_messages_sent=parse_int(row.get("team_messages_sent", "0")),
+                vibe_score=parse_int(row.get("vibe_score", "0"))
             )
             db.add(employee)
             records.append(employee)

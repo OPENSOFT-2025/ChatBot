@@ -14,17 +14,7 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/libpq/lib"
-export CPPFLAGS="-I/usr/local/opt/libpq/include"
-export DYLD_LIBRARY_PATH="/usr/local/opt/libpq/lib:$DYLD_LIBRARY_PATH"
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/libpq/lib"
-export CPPFLAGS="-I/usr/local/opt/libpq/include"
-export DYLD_LIBRARY_PATH="/usr/local/opt/libpq/lib:$DYLD_LIBRARY_PATH"
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/libpq/lib"
-export CPPFLAGS="-I/usr/local/opt/libpq/include"
-export DYLD_LIBRARY_PATH="/usr/local/opt/libpq/lib:$DYLD_LIBRARY_PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
+export DYLD_LIBRARY_PATH="/opt/homebrew/opt/libpq/lib:$DYLD_LIBRARY_PATH"

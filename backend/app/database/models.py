@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, Text, JSON
+from sqlalchemy import Column, Integer, String, Boolean, Text, JSON, Float
 from sqlalchemy.ext.mutable import MutableList, MutableDict
 from app.database.database import Base
 import datetime
@@ -7,12 +7,12 @@ import datetime
 class Employee(Base):
     __tablename__ = "employees"
     
-    id = Column(String, primary_key=True, index=True)                   # Employee ID provided as string
+    employee_id = Column(String, primary_key=True, index=True)                   # Employee ID provided as string
+    employee_name = Column(String, default="")                          # Default: empty string.
+    employee_email = Column(String, index=True, nullable=False)     
+    password = Column(String, default="")                           # Hashed password.
     is_selected = Column(Boolean, default=False)                        # Default: not selected for conversation.
     shap_values = Column(MutableList.as_mutable(JSON), default=[])      # Default: empty list.
-    employee_name = Column(String, default="")                          # Default: empty string.
-    employee_email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)                           # Hashed password.
     report = Column(Text, default="")                                   # Default: empty string.
     sentimental_score = Column(Integer, default=0)                      # Default: 0.
     is_resolved = Column(Boolean, default=False)                        # Default: not resolved.
@@ -20,10 +20,14 @@ class Employee(Base):
 
     work_hours = Column(Float, default=0.0)
     leave_days = Column(Integer, default=0)
+    leave_type = Column(String, default="")
     performance_rating = Column(Integer, default=0)
+    manager_feedback = Column(String, default="")
     promotion_consideration = Column(Boolean, default=False)
     reward_points = Column(Integer, default=0)
+    award_type = Column(String, default="")
     team_messages_sent = Column(Integer, default=0)
+    vibe_score = Column(Integer, default=0)
 
     
 class HRUser(Base):
