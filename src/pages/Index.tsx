@@ -1,12 +1,83 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from "react";
+import { HRBarChart } from "@/components/hr/BarChart";
+import { HRPieChart } from "@/components/hr/PieChart";
+import { Sidebar } from "@/components/hr/Sidebar";
+import { EmployeeTable } from "@/components/hr/EmployeeTable";
+import { StatsCard } from "@/components/hr/StatsCard";
+import { Users, FileText, CalendarDays, Clock } from "lucide-react";
 
 const Index = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Simulate loading delay for animations
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="flex h-screen bg-hr-light overflow-hidden">
+      <Sidebar 
+        collapsed={sidebarCollapsed} 
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      />
+      
+      <main className={`flex-1 transition-all duration-300 ease-in-out overflow-y-auto`}>
+        <div className="p-6 space-y-6">
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
+            <StatsCard 
+              title="Total Employees"
+              value="1,486"
+              description="+12 from last month"
+              icon={<Users size={16} />}
+              trend="up"
+              className="animate-slide-in-left"
+              style={{ animationDelay: '0.1s' }}
+            />
+            <StatsCard 
+              title="Open Positions"
+              value="24"
+              description="8 in technical roles"
+              icon={<FileText size={16} />}
+              trend="neutral"
+              className="animate-slide-in-left"
+              style={{ animationDelay: '0.2s' }}
+            />
+            <StatsCard 
+              title="Time to Hire"
+              value="21 days"
+              description="-3 days from last quarter"
+              icon={<CalendarDays size={16} />}
+              trend="up"
+              className="animate-slide-in-left"
+              style={{ animationDelay: '0.3s' }}
+            />
+            <StatsCard 
+              title="Retention Rate"
+              value="94.6%"
+              description="-1.2% from last year"
+              icon={<Clock size={16} />}
+              trend="down"
+              className="animate-slide-in-left"
+              style={{ animationDelay: '0.4s' }}
+            />
+          </div>
+          
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
+            <HRPieChart />
+            <HRBarChart />
+          </div>
+          
+          <div className={`${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+            <EmployeeTable />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
