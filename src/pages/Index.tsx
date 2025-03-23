@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/hr/Sidebar";
 import { EmployeeTable } from "@/components/hr/EmployeeTable";
 import { EmployeeReports } from "@/components/hr/EmployeeReports";
 import { StatsCard } from "@/components/hr/StatsCard";
-import { Users, FileText, CalendarDays, Clock } from "lucide-react";
+import { Users, FileText, CalendarDays, Clock, BarChart as BarChartIcon } from "lucide-react";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -35,7 +35,7 @@ const Index = () => {
           {/* Analytics Section */}
           <div id="analytics-section" ref={analyticsRef} className="space-y-6">
             <h2 className="text-2xl font-bold text-hr-green mb-4 flex items-center gap-2">
-              <BarChart size={24} className="text-hr-green" />
+              <BarChartIcon size={24} className="text-hr-green" />
               Analytics Dashboard
             </h2>
 
