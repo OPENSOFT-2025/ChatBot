@@ -2,14 +2,10 @@
 import React from 'react';
 import { 
   BarChart, 
-  PieChart, 
-  Users, 
   FileText, 
-  Settings, 
   LogOut, 
   User,
   Menu,
-  LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,16 +18,23 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div 
       className={cn(
-        "flex flex-col h-screen bg-white border-r border-gray-100 shadow-sidebar transition-all duration-300 ease-in-out",
+        "flex flex-col h-screen bg-hr-black border-r border-hr-green/30 shadow-sidebar transition-all duration-300 ease-in-out",
         collapsed ? "w-[70px]" : "w-[240px]"
       )}
     >
       <div className="flex items-center justify-between p-4">
         {!collapsed && (
-          <div className="font-semibold text-lg text-hr-charcoal animate-fade-in">
+          <div className="font-semibold text-lg text-hr-green animate-fade-in">
             HR Dashboard
           </div>
         )}
@@ -39,69 +42,86 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           variant="ghost" 
           size="icon" 
           onClick={onToggle}
-          className="text-gray-500 hover:text-hr-blue hover:bg-hr-gray transition-colors duration-200"
+          className="text-hr-green hover:text-white hover:bg-hr-green/20 transition-colors duration-200"
         >
           <Menu size={20} />
         </Button>
       </div>
       
-      <div className="flex flex-col items-center py-4">
-        <Avatar className={cn("h-10 w-10 transition-all duration-300", collapsed ? "mb-2" : "mb-3")}>
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>JD</AvatarFallback>
-        </Avatar>
-        {!collapsed && (
-          <div className="text-center animate-fade-in">
-            <div className="font-medium text-sm">John Doe</div>
-            <div className="text-xs text-gray-500">HR Manager</div>
-          </div>
-        )}
-      </div>
-      
-      <Separator className="my-2" />
+      <Separator className="my-2 bg-hr-green/20" />
       
       <div className="flex-1 overflow-y-auto hr-custom-scrollbar px-2 py-4 stagger-fade-in">
-        <NavItem icon={BarChart} label="Analytics" active collapsed={collapsed} />
-        <NavItem icon={PieChart} label="Reports" collapsed={collapsed} />
-        <NavItem icon={Users} label="Employees" collapsed={collapsed} />
-        <NavItem icon={FileText} label="Documents" collapsed={collapsed} />
-        <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
+        <NavItem 
+          icon={BarChart} 
+          label="Analytics" 
+          active 
+          collapsed={collapsed} 
+          onClick={() => scrollToSection('analytics-section')}
+        />
+        <NavItem 
+          icon={FileText} 
+          label="Reports" 
+          collapsed={collapsed} 
+          onClick={() => scrollToSection('reports-section')}
+        />
       </div>
       
+      <Separator className="my-2 bg-hr-green/20" />
+      
       <div className="p-4">
-        <Button 
-          variant="ghost" 
-          className={cn(
-            "w-full justify-start gap-2 text-gray-500 hover:text-hr-blue hover:bg-hr-gray transition-colors duration-200",
-            collapsed && "justify-center p-2"
+        <div className={cn(
+          "flex flex-col items-center rounded-lg bg-hr-green/10 p-4 transition-all duration-300",
+          collapsed ? "py-2" : "py-4"
+        )}>
+          <Avatar className={cn("h-16 w-16 border-2 border-hr-green shadow-lg mb-4", collapsed && "h-10 w-10 mb-2")}>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback className="bg-hr-green text-black font-semibold">JD</AvatarFallback>
+          </Avatar>
+          
+          {!collapsed && (
+            <div className="text-center space-y-1 animate-fade-in">
+              <div className="font-semibold text-white">John Doe</div>
+              <div className="text-xs text-hr-green font-medium">HR Manager</div>
+              <div className="text-xs text-gray-400">ID: HR-2024-001</div>
+            </div>
           )}
-        >
-          <LogOut size={20} />
-          {!collapsed && <span>Log Out</span>}
-        </Button>
+          
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "w-full mt-4 justify-center gap-2 text-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200",
+              collapsed && "p-2"
+            )}
+          >
+            <LogOut size={16} />
+            {!collapsed && <span>Log Out</span>}
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
 
 interface NavItemProps {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ size?: number }>;
   label: string;
   active?: boolean;
   collapsed: boolean;
+  onClick?: () => void;
 }
 
-function NavItem({ icon: Icon, label, active, collapsed }: NavItemProps) {
+function NavItem({ icon: Icon, label, active, collapsed, onClick }: NavItemProps) {
   return (
     <Button
       variant="ghost"
       className={cn(
-        "w-full justify-start gap-2 my-1 transition-all duration-200",
+        "w-full justify-start gap-2 my-3 transition-all duration-200",
         collapsed ? "justify-center p-2" : "px-3 py-2",
         active 
-          ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-          : "text-gray-500 hover:text-hr-blue hover:bg-hr-gray"
+          ? "bg-hr-green text-black" 
+          : "text-white hover:bg-hr-green/70 hover:text-black"
       )}
+      onClick={onClick}
     >
       <Icon size={20} />
       {!collapsed && <span>{label}</span>}

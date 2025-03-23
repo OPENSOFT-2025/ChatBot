@@ -64,9 +64,11 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				hr: {
-					blue: "#0EA5E9",
-					gray: "#F1F0FB",
-					charcoal: "#222222",
+					green: "#86BC25",
+					black: "#111111",
+					darkGray: "#222222",
+					lightGray: "#EEEEEE",
+					charcoal: "#333333",
 					light: "#F6F6F7"
 				}
 			},
