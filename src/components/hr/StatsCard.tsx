@@ -10,6 +10,7 @@ interface StatsCardProps {
   icon: React.ReactNode;
   trend?: 'up' | 'down' | 'neutral';
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function StatsCard({ 
@@ -18,13 +19,17 @@ export function StatsCard({
   description, 
   icon, 
   trend = 'neutral',
-  className 
+  className,
+  style
 }: StatsCardProps) {
   return (
-    <Card className={cn(
-      "overflow-hidden transition-all duration-300 hover:shadow-card",
-      className
-    )}>
+    <Card 
+      className={cn(
+        "overflow-hidden transition-all duration-300 hover:shadow-card",
+        className
+      )}
+      style={style}
+    >
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <div className="h-8 w-8 rounded-md bg-primary/10 p-1.5 text-primary">

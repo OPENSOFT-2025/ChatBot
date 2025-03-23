@@ -8,7 +8,8 @@ import {
   Settings, 
   LogOut, 
   User,
-  Menu
+  Menu,
+  LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -84,7 +85,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 }
 
 interface NavItemProps {
-  icon: React.FC<{ size?: number }>;
+  icon: LucideIcon;
   label: string;
   active?: boolean;
   collapsed: boolean;
