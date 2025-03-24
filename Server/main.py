@@ -2,9 +2,9 @@ from fastapi import FastAPI, HTTPException,Depends
 from pydantic import BaseModel
 from typing import List, Annotated
 from fastapi.middleware.cors import CORSMiddleware
-from hugging_face import get_huggingface_response  # Import the Hugging Face function
+from routes import chats
 from sqlalchemy.orm import Session,sessionmaker
-from routes import chats,check_database, auth # Import the user router
+from routes import check_database, auth # Import the user router
 import psycopg2,os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine

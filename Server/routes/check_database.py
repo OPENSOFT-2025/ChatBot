@@ -22,7 +22,6 @@ async def ingest_data(
             status_code=400,
             detail="Invalid table specified for ingestion. Supported values: employee, hr, conversation, message."
         )
-    
     # Check if the file extension is .csv (ignoring case)
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a CSV file.")

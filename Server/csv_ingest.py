@@ -2,6 +2,7 @@ import csv
 import io
 from sqlalchemy.orm import Session
 from database.models import Employee, HRUser, Conversation, Message
+import json
 
 def parse_bool(value: str) -> bool:
     return value.strip().lower() == "true"
@@ -77,7 +78,7 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
         for row in reader:
             hr_user = HRUser(
                 email=row.get("email"),
-                password=hash_password(row.get("password")),
+                # password=hash_password(row.get("password")),
                 role=row.get("role", "admin")
             )
             db.add(hr_user)
