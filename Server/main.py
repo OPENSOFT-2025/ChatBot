@@ -4,7 +4,7 @@ from typing import List, Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from hugging_face import get_huggingface_response  # Import the Hugging Face function
 from sqlalchemy.orm import Session,sessionmaker
-from routes import chats,check_database # Import the user router
+from routes import chats,check_database, auth # Import the user router
 import psycopg2,os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -15,6 +15,7 @@ from database.conn import engine
 app = FastAPI()
 app.include_router(chats.router)
 app.include_router(check_database.router)
+app.include_router(auth.router)
 
 app.add_middleware(
     CORSMiddleware,
