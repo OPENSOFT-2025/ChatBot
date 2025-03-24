@@ -149,10 +149,10 @@ const Index = () => {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="flagged">
-                  <EmployeeReports searchQuery={searchQuery} />
+                  <EmployeeReports />
                 </TabsContent>
                 <TabsContent value="unflagged">
-                  <EmployeeReports searchQuery={searchQuery} />
+                  <EmployeeReports />
                 </TabsContent>
               </Tabs>
             </div>
