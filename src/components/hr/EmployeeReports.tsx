@@ -8,23 +8,29 @@ import { Button } from '@/components/ui/button';
 import { FileText, Download } from 'lucide-react';
 
 const employeeReports = [
-  { id: 'EMP001', name: 'Alex Johnson', flagged: false, reportDate: '2023-05-15' },
-  { id: 'EMP002', name: 'Sarah Williams', flagged: true, reportDate: '2023-05-14' },
-  { id: 'EMP003', name: 'Michael Chen', flagged: false, reportDate: '2023-05-13' },
-  { id: 'EMP004', name: 'Emily Davis', flagged: false, reportDate: '2023-05-12' },
-  { id: 'EMP005', name: 'Robert Taylor', flagged: true, reportDate: '2023-05-11' },
-  { id: 'EMP006', name: 'Jennifer Lee', flagged: false, reportDate: '2023-05-10' },
-  { id: 'EMP007', name: 'David Wilson', flagged: true, reportDate: '2023-05-09' },
+  { id: 'EMP001', name: 'Alex Johnson', flagged: false },
+  { id: 'EMP002', name: 'Sarah Williams', flagged: true },
+  { id: 'EMP003', name: 'Michael Chen', flagged: false },
+  { id: 'EMP004', name: 'Emily Davis', flagged: false },
+  { id: 'EMP005', name: 'Robert Taylor', flagged: true },
+  { id: 'EMP006', name: 'Jennifer Lee', flagged: false },
+  { id: 'EMP007', name: 'David Wilson', flagged: true },
 ];
 
 export function EmployeeReports() {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('all');
 
   const handleDownload = (employeeId: string) => {
     // This would be replaced with actual PDF download functionality
     console.log(`Downloading report for employee ${employeeId}`);
     alert(`Downloading report for employee ${employeeId}`);
   };
+
+  // Filter the reports based on the active tab
+  const filteredReports = activeTab === 'all' 
+    ? employeeReports 
+    : employeeReports.filter(report => activeTab === 'flagged' ? report.flagged : !report.flagged);
 
   return (
     <Card className="shadow-card bg-card border border-hr-green/20">
@@ -35,8 +41,8 @@ export function EmployeeReports() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="w-full mb-4 grid grid-cols-2">
+        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="w-full mb-4 grid grid-cols-3">
             <TabsTrigger 
               value="all" 
               className="data-[state=active]:bg-hr-green data-[state=active]:text-black"
@@ -49,6 +55,12 @@ export function EmployeeReports() {
             >
               Flagged Reports
             </TabsTrigger>
+            <TabsTrigger 
+              value="unflagged" 
+              className="data-[state=active]:bg-hr-green data-[state=active]:text-black"
+            >
+              Unflagged Reports
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="mt-0">
@@ -58,12 +70,11 @@ export function EmployeeReports() {
                   <TableHead className="text-hr-green">Employee ID</TableHead>
                   <TableHead className="text-hr-green">Name</TableHead>
                   <TableHead className="text-hr-green">Status</TableHead>
-                  <TableHead className="text-hr-green">Report Date</TableHead>
                   <TableHead className="text-right text-hr-green">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employeeReports.map((report) => (
+                {filteredReports.map((report) => (
                   <TableRow 
                     key={report.id}
                     className="transition-colors duration-200 border-hr-green/10"
@@ -86,7 +97,6 @@ export function EmployeeReports() {
                         {report.flagged ? 'Flagged' : 'Unflagged'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{report.reportDate}</TableCell>
                     <TableCell className="text-right">
                       <Button 
                         variant="outline" 
@@ -110,12 +120,11 @@ export function EmployeeReports() {
                   <TableHead className="text-hr-green">Employee ID</TableHead>
                   <TableHead className="text-hr-green">Name</TableHead>
                   <TableHead className="text-hr-green">Status</TableHead>
-                  <TableHead className="text-hr-green">Report Date</TableHead>
                   <TableHead className="text-right text-hr-green">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employeeReports.filter(r => r.flagged).map((report) => (
+                {filteredReports.map((report) => (
                   <TableRow 
                     key={report.id}
                     className="transition-colors duration-200 border-hr-green/10"
@@ -129,13 +138,65 @@ export function EmployeeReports() {
                     <TableCell className="text-white">{report.name}</TableCell>
                     <TableCell>
                       <Badge 
-                        variant="destructive"
-                        className="bg-destructive/20 text-destructive border-destructive/30"
+                        variant={report.flagged ? "destructive" : "outline"}
+                        className={`
+                          transition-all duration-200 
+                          ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}
+                        `}
                       >
-                        Flagged
+                        {report.flagged ? 'Flagged' : 'Unflagged'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{report.reportDate}</TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleDownload(report.id)}
+                        className="text-hr-green border-hr-green/30 hover:bg-hr-green hover:text-black"
+                      >
+                        <Download size={14} className="mr-1" /> PDF
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TabsContent>
+
+          <TabsContent value="unflagged" className="mt-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-hr-green/20">
+                  <TableHead className="text-hr-green">Employee ID</TableHead>
+                  <TableHead className="text-hr-green">Name</TableHead>
+                  <TableHead className="text-hr-green">Status</TableHead>
+                  <TableHead className="text-right text-hr-green">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredReports.map((report) => (
+                  <TableRow 
+                    key={report.id}
+                    className="transition-colors duration-200 border-hr-green/10"
+                    onMouseEnter={() => setHoveredRow(report.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      backgroundColor: hoveredRow === report.id ? 'rgba(134, 188, 37, 0.1)' : 'transparent'
+                    }}
+                  >
+                    <TableCell className="font-medium text-muted-foreground">{report.id}</TableCell>
+                    <TableCell className="text-white">{report.name}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={report.flagged ? "destructive" : "outline"}
+                        className={`
+                          transition-all duration-200 
+                          ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}
+                        `}
+                      >
+                        {report.flagged ? 'Flagged' : 'Unflagged'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button 
                         variant="outline" 

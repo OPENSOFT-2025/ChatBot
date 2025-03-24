@@ -12,14 +12,13 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Updated data to reflect Vibemeter emotional states
+// Updated data to reflect weekdays instead of months
 const data = [
-  { month: 'Jan', Excited: 22, Happy: 35, Okay: 18, Sad: 15, Frustrated: 10 },
-  { month: 'Feb', Excited: 25, Happy: 38, Okay: 15, Sad: 12, Frustrated: 8 },
-  { month: 'Mar', Excited: 18, Happy: 30, Okay: 22, Sad: 18, Frustrated: 12 },
-  { month: 'Apr', Excited: 28, Happy: 40, Okay: 16, Sad: 10, Frustrated: 6 },
-  { month: 'May', Excited: 24, Happy: 36, Okay: 20, Sad: 12, Frustrated: 8 },
-  { month: 'Jun', Excited: 30, Happy: 42, Okay: 14, Sad: 8, Frustrated: 6 },
+  { day: 'Monday', Excited: 22, Happy: 35, Okay: 18, Sad: 15, Frustrated: 10 },
+  { day: 'Tuesday', Excited: 25, Happy: 38, Okay: 15, Sad: 12, Frustrated: 8 },
+  { day: 'Wednesday', Excited: 18, Happy: 30, Okay: 22, Sad: 18, Frustrated: 12 },
+  { day: 'Thursday', Excited: 28, Happy: 40, Okay: 16, Sad: 10, Frustrated: 6 },
+  { day: 'Friday', Excited: 24, Happy: 36, Okay: 20, Sad: 12, Frustrated: 8 },
 ];
 
 export function HRBarChart() {
@@ -37,7 +36,7 @@ export function HRBarChart() {
   return (
     <Card className={`shadow-card overflow-hidden ${isAnimating ? 'chart-appear' : ''}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-[1.15rem] font-bold text-gray-200">Employee Vibemeter Trends</CardTitle>
+        <CardTitle className="text-[1.25rem] font-bold text-gray-200">Employee Vibemeter Trends</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -54,7 +53,7 @@ export function HRBarChart() {
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
               <XAxis 
-                dataKey="month" 
+                dataKey="day" 
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fill: '#bbb', fontSize: 12 }}

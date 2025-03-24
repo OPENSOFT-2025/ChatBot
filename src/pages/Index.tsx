@@ -5,8 +5,7 @@ import { HRPieChart } from "@/components/hr/PieChart";
 import { Sidebar } from "@/components/hr/Sidebar";
 import { EmployeeTable } from "@/components/hr/EmployeeTable";
 import { EmployeeReports } from "@/components/hr/EmployeeReports";
-import { StatsCard } from "@/components/hr/StatsCard";
-import { Users, FileText, CalendarDays, Clock, BarChart as BarChartIcon, Search } from "lucide-react";
+import { BarChart as BarChartIcon, FileText, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -42,45 +41,6 @@ const Index = () => {
               <BarChartIcon size={24} className="text-hr-green" />
               ANALYTICS DASHBOARD
             </h2>
-
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
-              <StatsCard 
-                title="Total Employees"
-                value="35,428"
-                description="+142 from last month"
-                icon={<Users size={16} />}
-                trend="up"
-                className="animate-slide-in-left"
-                style={{ animationDelay: '0.1s' }}
-              />
-              <StatsCard 
-                title="Vibemeter Responses"
-                value="28,342"
-                description="80% participation rate"
-                icon={<FileText size={16} />}
-                trend="up"
-                className="animate-slide-in-left"
-                style={{ animationDelay: '0.2s' }}
-              />
-              <StatsCard 
-                title="Average Mood Score"
-                value="3.7/5"
-                description="+0.2 from last quarter"
-                icon={<CalendarDays size={16} />}
-                trend="up"
-                className="animate-slide-in-left"
-                style={{ animationDelay: '0.3s' }}
-              />
-              <StatsCard 
-                title="Flagged Concerns"
-                value="246"
-                description="-18% from last month"
-                icon={<Clock size={16} />}
-                trend="down"
-                className="animate-slide-in-left"
-                style={{ animationDelay: '0.4s' }}
-              />
-            </div>
             
             <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
               <HRPieChart />
@@ -139,22 +99,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <Tabs defaultValue="flagged" className="w-full">
-                <TabsList className="grid w-[200px] grid-cols-2 mb-4">
-                  <TabsTrigger value="flagged" className="data-[state=active]:bg-hr-green data-[state=active]:text-black">
-                    Flagged
-                  </TabsTrigger>
-                  <TabsTrigger value="unflagged" className="data-[state=active]:bg-hr-green data-[state=active]:text-black">
-                    Unflagged
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="flagged">
-                  <EmployeeReports />
-                </TabsContent>
-                <TabsContent value="unflagged">
-                  <EmployeeReports />
-                </TabsContent>
-              </Tabs>
+              <EmployeeReports />
             </div>
           </div>
         </div>
