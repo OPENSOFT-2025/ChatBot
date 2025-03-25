@@ -1,103 +1,262 @@
-import Image from "next/image";
-
+"use client";
+import { z } from 'zod';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { UsersAuth } from './context/AuthContext.js';
+import { FcGoogle } from "react-icons/fc";
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const {user,googleSignIn,logOut}=UsersAuth();
+  const handleSignIn=async()=>{
+    try{
+      await googleSignIn();
+    }catch(error){
+      console.log(error);
+    }
+  }
+  const handleSignOut=async()=>{
+    try{
+      await logOut();
+    }catch(error){
+      console.log(error);
+    }
+  }
+  const loginSchema = z.object({
+    email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).max(50),
+    password: z.string().regex(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+      "Password must contain at least 8 characters, including letters, numbers, and special characters"
+    ).max(20),
+  });
+  const registerSchema = z.object({
+    employeeId: z.string().max(50).min(1),
+    name: z.string().max(50).min(1),
+    email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).max(50),
+    password: z.string().regex(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+      "Password must contain at least 8 characters, including letters, numbers, and special characters"
+    ).max(20),
+    confirmPassword: z.string().max(20),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+  const [RegisterformData, setRegisterFormData] = useState({
+    employeeId: '',
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [LoginformData, setLoginFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [Loginerrors, setLoginErrors] = useState({
+    email: 0,
+    password: 0
+  });
+  const [Registererrors, setRegisterErrors] = useState({
+    employeeId: 0,
+    name: 0,
+    email: 0,
+    password: 0,
+    confirmPassword: 0,
+  });
+  const handleLoginChange = (e) => {
+    const { name, value } = e.target;
+    const updatedFormData = { ...LoginformData, [name]: value };
+    setLoginFormData(updatedFormData);
+    let result = loginSchema.safeParse(updatedFormData);
+    let newError = { email: 0, password: 0 };
+    if (!result.success) {
+      result.error.errors.forEach(err => {
+        if (err.path.includes("email")) newError.email = 1;
+        if (err.path.includes("password")) newError.password = 1;
+      });
+    }
+    setLoginErrors(newError);
+  };
+  const handleRegisterChange = (e) => {
+    const { name, value } = e.target;
+    const updatedFormData = { ...RegisterformData, [name]: value };
+    setRegisterFormData(updatedFormData);
+    console.log(updatedFormData);
+    let result = registerSchema.safeParse(updatedFormData);
+    console.log(result);
+    let newError = {
+      employeeId: 0,
+      name: 0,
+      email: 0,
+      password: 0,
+      confirmPassword: 0,
+    };
+    if (!result.success) {
+      result.error.errors.forEach(err => {
+        if (err.path.includes("employeeId")) newError.employeeId = 1;
+        if (err.path.includes("name")) newError.name = 1;
+        if (err.path.includes("email")) newError.email = 1;
+        if (err.path.includes("password")) newError.password = 1;
+        if (err.path.includes("confirmPassword")) newError.confirmPassword = 1;
+      });
+    }
+    setRegisterErrors(newError);
+  };
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    let result = loginSchema.safeParse(LoginformData);
+    console.log(result);
+    if (result.success) {
+      console.log("form submitted");
+    } else {
+      let newError = { email: 0, password: 0 };
+      result.error.errors.forEach(err => {
+        if (err.path.includes("email")) newError.email = 1;
+        if (err.path.includes("password")) newError.password = 1;
+      });
+      setLoginErrors(newError);
+    }
+  };
+  const handleRegisterSubmit = (e) => {
+    e.preventDefault();
+    let result = registerSchema.safeParse(RegisterformData);
+    console.log(result);
+    if (result.success) {
+      console.log("form submitted");
+    } else {
+      let newError = {
+        employeeId: 0,
+        name: 0,
+        email: 0,
+        password: 0,
+        confirmPassword: 0,
+      };
+      result.error.errors.forEach(err => {
+        if (err.path.includes("employeeId")) newError.employeeId = 1;
+        if (err.path.includes("name")) newError.name = 1;
+        if (err.path.includes("email")) newError.email = 1;
+        if (err.path.includes("password")) newError.password = 1;
+        if (err.path.includes("confirmPassword")) newError.confirmPassword = 1;
+      });
+      setRegisterErrors(newError);
+    }
+  };
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const handleSwitchToRegister = () => {
+    setLoginOpen(false);
+    setRegisterOpen(true);
+  };
+  return (
+    <>
+      <div className='flex gap-5 h-50 justify-center items-center bg-gray-900'>
+        <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" onClick={() => setLoginOpen(true)}>Login</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className='text-center text-2xl'>Login</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-3">
+              <div className="grid grid-cols-4 items-center gap-4 mb-3">
+                <Label htmlFor="registerEmail" className="text-right">
+                  Email
+                </Label>
+                <Input id="registerEmail" name="email" type="email" className="col-span-3" placeholder='JohnDoe@gmail.com' onChange={handleLoginChange} required="" />
+              </div>
+              {Loginerrors.email ? <p className="text-red-500 text-xs">Enter valid email.</p> : <></>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerPassword" className="text-right">
+                  Password
+                </Label>
+                <Input id='registerPassword' name="password" type="password" className="col-span-3" placeholder='••••••••' onChange={handleLoginChange} required="" />
+              </div>
+              {Loginerrors.password ? <p className="text-red-500 text-xs">Password must contain at least 8 characters, including letters, numbers, and special characters</p> : <></>}
+            </div>
+            <DialogDescription></DialogDescription>
+            <DialogFooter>
+              <Button className="cursor-pointer bg-gray-50 hover:bg-gray-200" type="submit" onClick={handleLoginSubmit}>Submit</Button>
+            </DialogFooter>
+            <div className='m-auto h-0.5 w-5/6 bg-gray-500'></div>
+            <Button className='cursor-pointer bg-gray-200' onClick={handleSignIn}>SignIn with Google <FcGoogle size={24}/></Button>
+            <p className="text-sm text-center font-light text-gray-500 dark:text-gray-400">
+              Don&apos;t have an account yet? &nbsp;
+              <span 
+              className="font-medium text-[#2563eb] hover:underline dark:text-[#60a5fa] cursor-pointer"
+              onClick={handleSwitchToRegister}
+            >
+              Register
+            </span>
+            </p>
+          </DialogContent>
+        </Dialog>
+        {/* Register Dialog */}
+        <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" onClick={() => setRegisterOpen(true)}>Register</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className='text-center'>Register</DialogTitle>
+            </DialogHeader>
+            <DialogDescription></DialogDescription>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerEmployeeId" className="text-right">
+                  Employee Id
+                </Label>
+                <Input id="registerEmployeeId" name="employeeId" type="text" className="col-span-3" onChange={handleRegisterChange} required="" />
+              </div>
+              {Registererrors.employeeId ? <p className="text-red-500 w-auto text-xs">Enter valid Employee Id.</p> : <></>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerName" className="text-right">
+                  Name
+                </Label>
+                <Input id="registerName" name="name" type="text" className="col-span-3" onChange={handleRegisterChange} required="" />
+              </div>
+              {Registererrors.name ? <p className="text-red-500 text-xs">Enter valid Name.</p> : <></>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerEmail" className="text-right">
+                  Email
+                </Label>
+                <Input id="registerEmail" name="email" type="email" className="col-span-3" placeholder='JohnDoe@gmail.com' onChange={handleRegisterChange} required="" />
+              </div>
+              {Registererrors.email ? <p className="text-red-500 text-xs">Enter valid email.</p> : <></>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerPassword" className="text-right">
+                  Password
+                </Label>
+                <Input id='registerPassword' name="password" type="password" className="col-span-3" placeholder='••••••••' onChange={handleRegisterChange} required="" />
+              </div>
+              {Registererrors.password ? <p className="text-red-500 text-xs">Password must contain at least 8 characters, including letters, numbers, and special characters</p> : <></>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerConfirmPassword" className="text-left">
+                  Confirm Password
+                </Label>
+                <Input id="registerConfirmPassword" name="confirmPassword" type="password" className="col-span-3" placeholder='••••••••' onChange={handleRegisterChange} required="" />
+              </div>
+              {Registererrors.confirmPassword ? <p className="text-red-500 text-xs">Passwords Don&apos;t match </p> : <></>}
+            </div>
+            <DialogFooter>
+              <Button className="cursor-pointer bg-gray-50 hover:bg-gray-200" type="submit" onClick={handleRegisterSubmit}>Submit</Button>
+            </DialogFooter>
+            <div className='m-auto h-0.5 w-5/6 bg-gray-500'></div>
+            <Button className='cursor-pointer bg-gray-200' onClick={handleSignIn}>SignIn with Google <FcGoogle size={24}/></Button>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }
