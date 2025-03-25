@@ -40,30 +40,14 @@ class HRUser(Base):
     role = Column(String, default="admin")                              # Default: "admin".  
 
 
-# class Conversation(Base):
-#     __tablename__ = "conversations"
-    
-#     id = Column(Integer, primary_key=True, index=True)  # Conversation ID.
-#     employee_id = Column(String, nullable=False)         # Reference to Employee.id.
-#     messages = Column(MutableList.as_mutable(JSON), default=[])  # List of message IDs.
-
-# class Message(Base):
-#     __tablename__ = "messages"
-    
-#     id = Column(Integer, primary_key=True, index=True)   # Message ID.
-#     conv_id = Column(Integer, nullable=False)            # Reference to Conversation.id.
-#     content = Column(Text, nullable=False)
-    
-
 class Conversation(Base):
     __tablename__ = "conversations"
     
-    id = Column(Integer, primary_key=True, index=True)
-    employee_id = Column(String, nullable=False)
-    shap_values = Column(MutableList.as_mutable(JSON), default=[])  # e.g., ["Work_Hours", "Leave_Type", ...]
-    current_question_index = Column(Integer, default=0)
-    is_closed = Column(Boolean, default=False)                         # whether a conversation is finished or active
-    messages = Column(MutableList.as_mutable(JSON), default=[])  # Store message IDs or texts
+    id = Column(Integer, primary_key=True, index=True)  # Conversation ID.
+    employee_id = Column(String, nullable=False)         # Reference to Employee.id.
+    employee_name = Column(String, nullable=False)
+    message_ids = Column(MutableList.as_mutable(JSON), default=[])  # List of message IDs.
+
 
 class Message(Base):
     __tablename__ = "messages"
@@ -72,7 +56,24 @@ class Message(Base):
     # conv_id = Column(Integer, nullable=False)
     content = Column(Text, nullable=False)
     sender_type = Column(String, nullable=False)  # "assistant" or "user"
-    content_type = Column(String, nullable=False)  # "text" or "voice"
+    
+# class Message(Base):
+#     __tablename__ = "messages"
+    
+#     id = Column(Integer, primary_key=True, index=True)   # Message ID.
+#     conv_id = Column(Integer, nullable=False)            # Reference to Conversation.id.
+#     content = Column(Text, nullable=False)
+    
+
+# class Conversation(Base):
+#     __tablename__ = "conversations"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     employee_id = Column(String, nullable=False)
+#     employee_name = Column(String, nullable=False)
+#     questions = Column(JSON, nullable=False)      # Gemini's questions (stored as an array)
+#    #  responses = Column(JSON, nullable=False)      # Employee's responses (stored as an array)    
+    # content_type = Column(String, nullable=False)  # "text" or "voice"
 
 # Activity Tracker
 class ActivityTracker(Base):
@@ -138,7 +139,7 @@ class Rewards(Base):
 # Vibemeter Responses
 class Vibemeter(Base):
     __tablename__ = "vibemeter"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     employee_id = Column(String, index=True, nullable=False)
     response_date = Column(String, nullable=True)
