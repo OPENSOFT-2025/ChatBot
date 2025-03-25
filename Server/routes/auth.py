@@ -4,7 +4,7 @@ from datetime import timedelta
 import firebase_admin
 from firebase_admin import auth, credentials
 
-from database.models import Employee
+from database.models import Master
 from database.conn import SessionLocal
 from pydantic import BaseModel, EmailStr
 from typing import List
@@ -57,7 +57,7 @@ def check_employee_id(payload: EmployeeCheckRequest, db: Session = Depends(get_d
     """
     1) Check if the employee_id exists in the system.
     """
-    existing = db.query(Employee).filter(Employee.employee_id == payload.employee_id).first()
+    existing = db.query(Master).filter(Master.employee_id == payload.employee_id).first()
     return {"exists": bool(existing)}
 
 @router.post("/register", response_model=UserRegister)
@@ -69,7 +69,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
     return an error.
     """
     # Check if the employee_id exists in the database
-    existing_employee = db.query(Employee).filter(Employee.employee_id == user.employee_id).first()
+    existing_employee = db.query(Master).filter(Master.employee_id == user.employee_id).first()
     if not existing_employee:
         raise HTTPException(
             status_code=400,
@@ -124,7 +124,7 @@ def get_current_user(
             raise HTTPException(status_code=401, detail="Token missing employee identifier")
     
     # Query the Employee record using the employee_id
-    user = db.query(Employee).filter(Employee.employee_id == employee_id).first()
+    user = db.query(Master).filter(Master.employee_id == employee_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -132,5 +132,5 @@ def get_current_user(
 
 
 @router.get("/employee", response_model=UserResponse)
-def get_employee(current_user: Employee = Depends(get_current_user)):
+def get_employee(current_user: Master = Depends(get_current_user)):
     return current_user
