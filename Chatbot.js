@@ -115,21 +115,21 @@ function Chatbot() {
           /* Custom scrollbar styles */
           .custom-scroll {
             scrollbar-width: thin;
-            scrollbar-color: #000000 #131313; /* Black thumb, dark track */
+            scrollbar-color: #232323 #000000; /* Updated thumb color to #232323 */
           }
           .custom-scroll::-webkit-scrollbar {
             width: 8px;
           }
           .custom-scroll::-webkit-scrollbar-track {
-            background: #131313;
+            background: #000000; /* Track remains black */
             border-radius: 4px;
           }
           .custom-scroll::-webkit-scrollbar-thumb {
-            background: #000000; /* Black thumb */
+            background: #232323; /* Updated thumb color to #232323 */
             border-radius: 4px;
           }
           .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: #333; /* Slightly lighter on hover */
+            background: #333; /* Hover color remains #333 */
           }
         `}
       </style>
@@ -349,7 +349,7 @@ const styles = {
     borderRadius: "12px 12px 4px 12px",
     maxWidth: "180px", // Set maxWidth to control wrapping
     display: "inline-block", // Background only around text
-    textAlign: "left", // Align text to the left (changed from "right")
+    textAlign: "left", // Align text to the left
     position: "relative",
     alignSelf: "flex-end",
     wordBreak: "break-word",
