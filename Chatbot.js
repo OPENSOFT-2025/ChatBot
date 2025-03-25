@@ -112,33 +112,24 @@ function Chatbot() {
             background-color: #26890d;
             border-radius: 50%;
           }
-          /* Webkit browsers (Chrome, Safari, Edge) */
-          .chat-box::-webkit-scrollbar {
-            width: 8px !important;
+          /* Custom scrollbar styles */
+          .custom-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #000000 #131313; /* Black thumb, dark track */
           }
-          .chat-box::-webkit-scrollbar-track {
-            background: #131313 !important; /* Force black background */
-            border-radius: 4px !important;
-            box-shadow: none !important;
+          .custom-scroll::-webkit-scrollbar {
+            width: 8px;
           }
-          .chat-box::-webkit-scrollbar-thumb {
-            background: #333 !important;
-            border-radius: 4px !important;
+          .custom-scroll::-webkit-scrollbar-track {
+            background: #131313;
+            border-radius: 4px;
           }
-          .chat-box::-webkit-scrollbar-thumb:hover {
-            background: #555 !important;
+          .custom-scroll::-webkit-scrollbar-thumb {
+            background: #000000; /* Black thumb */
+            border-radius: 4px;
           }
-          .chat-box::-webkit-scrollbar-button {
-            display: none !important; /* Hide scrollbar buttons */
-          }
-          /* Firefox */
-          .chat-box {
-            scrollbar-width: thin !important;
-            scrollbar-color: #333 #131313 !important; /* Thumb #333, track #131313 (black) */
-          }
-          /* Ensure the container itself doesn't interfere */
-          .chat-box {
-            background: #131313 !important; /* Match the background to the track */
+          .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #333; /* Slightly lighter on hover */
           }
         `}
       </style>
@@ -155,7 +146,7 @@ function Chatbot() {
           </div>
         </div>
 
-        <div style={{ ...styles.chatBox, className: "chat-box" }} ref={chatBoxRef}>
+        <div style={styles.chatBox} ref={chatBoxRef} className="custom-scroll">
           {messages.map((msg, index) => (
             <div
               key={index}
@@ -173,6 +164,7 @@ function Chatbot() {
                 style={{
                   ...styles.messageContainer,
                   maxWidth: msg.sender === "bot" ? "50%" : "60%",
+                  marginRight: msg.sender === "user" ? "8px" : "0", // Fixed distance from user DP
                 }}
               >
                 <div style={msg.sender === "user" ? styles.userMsg : styles.botMsg}>
@@ -328,7 +320,7 @@ const styles = {
     overflowY: "auto",
     padding: "15px",
     position: "relative",
-    backgroundColor: "#131313",
+    backgroundColor: "black",
     display: "flex",
     flexDirection: "column",
     gap: "15px",
@@ -355,7 +347,9 @@ const styles = {
     color: "white",
     padding: "10px 15px",
     borderRadius: "12px 12px 4px 12px",
-    maxWidth: "60%",
+    maxWidth: "180px", // Set maxWidth to control wrapping
+    display: "inline-block", // Background only around text
+    textAlign: "left", // Align text to the left (changed from "right")
     position: "relative",
     alignSelf: "flex-end",
     wordBreak: "break-word",
@@ -366,10 +360,10 @@ const styles = {
   userMsgTail: {
     content: "''",
     position: "absolute",
-    top: "1px",
-    right: "-2px",
-    width: "12px",
-    height: "12px",
+    top: "-0.5px",
+    right: "-5px",
+    width: "15px",
+    height: "29.55px",
     backgroundColor: "#005C4B",
     clipPath: "polygon(100% 0, 0 0, 0 100%)",
   },
@@ -389,10 +383,10 @@ const styles = {
   botMsgTail: {
     content: "''",
     position: "absolute",
-    top: "1px",
-    left: "-3px",
-    width: "12px",
-    height: "12px",
+    top: "-0.2px",
+    left: "-6px",
+    width: "16px",
+    height: "29px",
     backgroundColor: "#333",
     clipPath: "polygon(0 0, 100% 0, 100% 100%)",
   },
