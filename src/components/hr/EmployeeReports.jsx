@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -99,20 +98,17 @@ export function EmployeeReports({ searchQuery = '' }) {
                       <TableCell>
                         <Badge 
                           variant={report.flagged ? "destructive" : "outline"}
-                          className={`
-                            transition-all duration-200 
-                            ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}
-                          `}
+                          className={`transition-all duration-200 ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}`}
                         >
                           {report.flagged ? 'Flagged' : 'Unflagged'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm" 
                           onClick={() => handleDownload(report.id)}
-                          className="text-hr-green border-hr-green/30 hover:bg-hr-green hover:text-black"
+                          className="px-2 text-hr-green hover:bg-transparent hover:text-hr-green border border-hr-green/30"
                         >
                           <Download size={14} className="mr-1" /> PDF
                         </Button>
@@ -166,10 +162,10 @@ export function EmployeeReports({ searchQuery = '' }) {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm" 
                           onClick={() => handleDownload(report.id)}
-                          className="text-hr-green border-hr-green/30 hover:bg-hr-green hover:text-black"
+                          className="px-2 text-hr-green hover:bg-transparent hover:text-hr-green border border-hr-green/30"
                         >
                           <Download size={14} className="mr-1" /> PDF
                         </Button>
@@ -223,10 +219,10 @@ export function EmployeeReports({ searchQuery = '' }) {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm" 
                           onClick={() => handleDownload(report.id)}
-                          className="text-hr-green border-hr-green/30 hover:bg-hr-green hover:text-black"
+                          className="px-2 text-hr-green hover:bg-transparent hover:text-hr-green border border-hr-green/30"
                         >
                           <Download size={14} className="mr-1" /> PDF
                         </Button>

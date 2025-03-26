@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { PieChart as RechartsPC, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,7 @@ const COLORS = ['#86BC25', '#E11D48'];
 
 export function HRPieChart() {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [activeSlice, setActiveSlice] = useState(null);
   
   useEffect(() => {
     setIsAnimating(true);
@@ -20,6 +20,10 @@ export function HRPieChart() {
   const renderColorfulLegendText = (value: string, entry: any) => {
     const color = entry.color;
     return <span style={{ color: color, fontWeight: 'bold' }}>{value}</span>;
+  };
+
+  const handleClick = (data, index) => {
+    setActiveSlice(activeSlice === index ? null : index);
   };
 
   return (
@@ -43,9 +47,23 @@ export function HRPieChart() {
                 animationBegin={300}
                 animationEasing="ease-out"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                onClick={handleClick}
+                onMouseEnter={(data, index) => {
+                  setActiveSlice(index);
+                }}
+                onMouseLeave={() => {
+                  setActiveSlice(null);
+                }}
+                strokeWidth={activeSlice !== null ? 3 : 1}
+                stroke="#131313"
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]}
+                    strokeWidth={activeSlice === index ? 3 : 1}
+                    stroke={activeSlice === index ? COLORS[index] : '#131313'}
+                  />
                 ))}
               </Pie>
               <Tooltip 
@@ -57,6 +75,8 @@ export function HRPieChart() {
                   border: 'none',
                   color: '#f0f0f0'
                 }}
+                labelStyle={{ color: '#ffffff' }}
+                itemStyle={{ color: '#ffffff' }}
               />
               <Legend 
                 layout="horizontal" 
