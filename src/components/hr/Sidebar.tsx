@@ -78,7 +78,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="p-4">
         <div className={cn(
           "flex flex-col items-center rounded-lg bg-hr-green/10 p-4 transition-all duration-300 hover:bg-hr-green/20",
-          collapsed ? "py-2" : "py-4"
+          collapsed ? "py-2 bg-transparent hover:bg-transparent" : "py-4 bg-hr-green/10 hover:bg-hr-green/20"
         )}>
           <Avatar className={cn("h-20 w-20 border-2 border-hr-green shadow-lg mb-4", collapsed && "h-10 w-10 mb-2")}>
             <AvatarImage src="https://github.com/shadcn.png" />
