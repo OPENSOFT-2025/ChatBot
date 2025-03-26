@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { HRBarChart } from "@/components/hr/BarChart";
 import { HRPieChart } from "@/components/hr/PieChart";
@@ -55,12 +54,16 @@ const Index = () => {
             <div className={`${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.7s' }}>
               <div className="mb-4 flex items-center">
                 <div className="relative w-full max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
                   <Input 
-                    className="pl-10 bg-hr-black border-hr-green/30 focus-visible:ring-hr-green/50"
+                    className="pl-10 bg-hr-black border border-hr-green/30 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-hr-green/70 text-gray-200 placeholder:text-gray-500 outline-none"
                     placeholder="Search by employee ID or name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    type="text"
+                    autoComplete="off"
+                    spellCheck="false"
+                    style={{ boxShadow: 'none' }}
                   />
                 </div>
               </div>
