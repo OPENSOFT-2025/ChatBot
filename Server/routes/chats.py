@@ -10,6 +10,7 @@ from gemini import generate_text
 from database.conn import get_db
 from typing import List, Dict
 from datetime import datetime
+from openai import chat_with_gpt4o
 
 from database.models import Conversation,Message
 
@@ -45,7 +46,6 @@ class PromptRequest(BaseModel):
 async def start_conversation(request: StartConversationRequest, db: Session = Depends(get_db)):
     greeting_prompt = f"Generate a greeting message for {request.employee_name} and ask his/her vibe of today."
     greeting_message = generate_text(greeting_prompt)
-
     gemini_message = Message(
         content=greeting_message,
         sender_type="chatbot"
@@ -111,10 +111,13 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
 
         # Generate AI's response
         ai_prompt = (
-            f"The employee's response is : {request.message}.Based on this response ask any one follow-up question strictly from the question bank provided below and this question should not be present or related to the list of previously asked questions provided below.Your response should have one line only."
-            f"List of previously asked questions: {already_asked} \n"
-            f"Question bank: {question_text} \n"
-        )
+    f"The employee's response is: {request.message}. "
+    f"Based on this response, ask **ONLY ONE follow-up question** strictly from the question bank provided below. "
+    f"- **Your response must be in a single sentence only.** "
+    f"- **Do not include explanations, lists, or multiple questions.** "
+    f"- **Do not repeat any questions from the list of previously asked questions.**\n\n"
+    f"List of previously asked questions: {already_asked}\n"
+    f"Question bank:\n{question_text}\n"        )
 
         generated_message = generate_text(request.message)
 
