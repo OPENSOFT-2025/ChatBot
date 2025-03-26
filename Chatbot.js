@@ -108,10 +108,6 @@ function Chatbot() {
           .icon-wrapper:hover {
             border: 2px solid #26890d !important;
           }
-          .mic-wrapper:hover {
-            background-color: #26890d;
-            border-radius: 50%;
-          }
           /* Custom scrollbar styles */
           .custom-scroll {
             scrollbar-width: thin;
@@ -134,18 +130,6 @@ function Chatbot() {
         `}
       </style>
       <div style={styles.container}>
-        <div style={styles.header}>
-          <div style={styles.avatarContainer}>
-            <div style={styles.avatar}>{getInitial("A")}</div>
-          </div>
-          <div style={styles.headerText}>
-            <div style={styles.headerTitle}>Assistant</div>
-          </div>
-          <div style={styles.headerIcons}>
-            <span style={styles.headerIcon}>✕</span>
-          </div>
-        </div>
-
         <div style={styles.chatBox} ref={chatBoxRef} className="custom-scroll">
           {messages.map((msg, index) => (
             <div
@@ -170,7 +154,7 @@ function Chatbot() {
                 <div style={msg.sender === "user" ? styles.userMsg : styles.botMsg}>
                   {msg.text}
                   {index === messages.length - 1 && msg.sender === "bot" && (
-                    <div style={styles.timestamp}>5:55 PM</div>
+                    <div style={styles.timestamp}></div>
                   )}
                 </div>
                 <div
@@ -244,7 +228,7 @@ function Chatbot() {
           <div style={styles.iconWrapper} className="mic-wrapper">
             <FaMicrophone
               onClick={handleMicClick}
-              style={{ ...styles.actionIcon, color: "#fff" }}
+              style={{ ...styles.actionIcon, color: "#000000" }} // Black microphone
             />
           </div>
         </div>
@@ -263,7 +247,7 @@ const styles = {
     background: "#131313",
   },
   container: {
-    width: "370px",
+    width: "670px",
     height: "600px",
     margin: "auto",
     fontFamily: "Arial, sans-serif",
@@ -275,45 +259,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    padding: "15px",
-    borderBottom: "1px solid #333",
-    backgroundColor: "#252525",
-  },
-  avatarContainer: {
-    marginRight: "10px",
-  },
-  avatar: {
-    width: "35px",
-    height: "35px",
-    borderRadius: "50%",
-    backgroundColor: "#26890d",
-    color: "white",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontWeight: "bold",
-    fontSize: "16px",
-  },
-  headerText: {
-    flex: 1,
-    color: "white",
-  },
-  headerTitle: {
-    fontWeight: "bold",
-    fontSize: "14px",
-  },
-  headerIcons: {
-    display: "flex",
-    gap: "8px",
-    color: "white",
-  },
-  headerIcon: {
-    cursor: "pointer",
-    fontSize: "16px",
   },
   chatBox: {
     flex: 1,
@@ -346,7 +291,7 @@ const styles = {
     backgroundColor: "#005C4B",
     color: "white",
     padding: "10px 15px",
-    borderRadius: "12px 12px 4px 12px",
+    borderRadius: "12px 17px 4px 12px",
     maxWidth: "180px", // Set maxWidth to control wrapping
     display: "inline-block", // Background only around text
     textAlign: "left", // Align text to the left
@@ -360,10 +305,10 @@ const styles = {
   userMsgTail: {
     content: "''",
     position: "absolute",
-    top: "-0.5px",
-    right: "-5px",
-    width: "15px",
-    height: "29.55px",
+    top: "-0.1px",
+    right: "-8px",
+    width: "24px",
+    height: "35.55px",
     backgroundColor: "#005C4B",
     clipPath: "polygon(100% 0, 0 0, 0 100%)",
   },
@@ -463,6 +408,8 @@ const styles = {
     height: "28px",
     border: "2px solid transparent",
     transition: "border 0.2s ease",
+    backgroundColor: "#26890d", // Permanent green background
+    borderRadius: "50%", // Circular shape
   },
   scrollToBottomButton: {
     position: "absolute",
@@ -482,6 +429,18 @@ const styles = {
   scrollIcon: {
     color: "white",
     fontSize: "20px",
+  },
+  avatar: {
+    width: "35px",
+    height: "35px",
+    borderRadius: "50%",
+    backgroundColor: "#26890d",
+    color: "white",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontWeight: "bold",
+    fontSize: "16px",
   },
 };
 
