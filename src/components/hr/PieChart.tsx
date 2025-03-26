@@ -29,7 +29,7 @@ export function HRPieChart() {
   return (
     <Card className={`shadow-card overflow-hidden ${isAnimating ? 'chart-appear' : ''}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-[1.15rem] font-bold text-gray-200">Employee Flag Status</CardTitle>
+        <CardTitle className="text-xl font-medium text-gray-200">Employee Flag Status</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">

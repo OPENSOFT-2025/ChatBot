@@ -48,22 +48,22 @@ export function EmployeeReports({ searchQuery = '' }) {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="w-full mb-4 grid grid-cols-3">
+          <TabsList className="w-full mb-4 flex justify-around gap-3 bg-transparent border-0 shadow-none" style={{ backgroundColor: 'transparent' }}>
             <TabsTrigger 
               value="all" 
-              className="data-[state=active]:bg-hr-green data-[state=active]:text-black"
+              className="data-[state=active]:bg-hr-green data-[state=active]:text-black flex-1 hover:bg-hr-green/20 transition-colors duration-200 border border-hr-green/60"
             >
               All Reports
             </TabsTrigger>
             <TabsTrigger 
               value="unflagged" 
-              className="data-[state=active]:bg-hr-green data-[state=active]:text-black"
+              className="data-[state=active]:bg-hr-green data-[state=active]:text-black flex-1 hover:bg-hr-green/20 transition-colors duration-200 border border-hr-green/60"
             >
               Unflagged Reports
             </TabsTrigger>
             <TabsTrigger 
               value="flagged" 
-              className="data-[state=active]:bg-hr-green data-[state=active]:text-black"
+              className="data-[state=active]:bg-hr-green data-[state=active]:text-black flex-1 hover:bg-hr-green/20 transition-colors duration-200 border border-hr-green/60"
             >
               Flagged Reports
             </TabsTrigger>
@@ -98,7 +98,7 @@ export function EmployeeReports({ searchQuery = '' }) {
                       <TableCell>
                         <Badge 
                           variant={report.flagged ? "destructive" : "outline"}
-                          className={`transition-all duration-200 ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}`}
+                          className={`transition-all duration-200 pointer-events-none ${report.flagged ? 'bg-destructive/20 text-destructive border-destructive/30' : 'bg-hr-green/20 text-hr-green border-hr-green/30'}`}
                         >
                           {report.flagged ? 'Flagged' : 'Unflagged'}
                         </Badge>
@@ -155,7 +155,7 @@ export function EmployeeReports({ searchQuery = '' }) {
                       <TableCell>
                         <Badge 
                           variant="outline"
-                          className="bg-hr-green/20 text-hr-green border-hr-green/30"
+                          className="bg-hr-green/20 text-hr-green border-hr-green/30 pointer-events-none"
                         >
                           Unflagged
                         </Badge>
@@ -212,7 +212,7 @@ export function EmployeeReports({ searchQuery = '' }) {
                       <TableCell>
                         <Badge 
                           variant="destructive"
-                          className="bg-destructive/20 text-destructive border-destructive/30"
+                          className="bg-destructive/20 text-destructive border-destructive/30 pointer-events-none"
                         >
                           Flagged
                         </Badge>

@@ -106,8 +106,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </div>
               
               <Button 
-                variant="outline" 
-                className="w-full mt-2 justify-center gap-2 text-hr-green border-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
+                variant="default" 
+                className="w-full mt-2 justify-center gap-2 bg-[#252525] text-hr-green border-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
               >
                 <LogOut size={16} />
                 <span>Log Out</span>
@@ -117,8 +117,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           
           {collapsed && (
             <Button 
-              variant="ghost" 
-              className="p-2 mt-2 justify-center text-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
+              variant="default" 
+              className="p-2 mt-2 justify-center bg-[#252525] text-hr-green hover:bg-hr-green hover:text-black transition-colors duration-200"
             >
               <LogOut size={16} />
             </Button>
@@ -145,8 +145,8 @@ function NavItem({ icon: Icon, label, active, collapsed, onClick }: NavItemProps
         "w-full justify-start gap-2 my-3 transition-all duration-200",
         collapsed ? "justify-center p-2" : "px-3 py-2",
         active 
-          ? "bg-hr-green text-black" 
-          : "text-white hover:bg-hr-green/70 hover:text-black"
+          ? "bg-[#26890d] text-black" 
+          : "text-white hover:bg-[#86BC25] hover:text-black"
       )}
       onClick={onClick}
     >
