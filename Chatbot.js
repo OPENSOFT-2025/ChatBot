@@ -247,8 +247,8 @@ const styles = {
     background: "#131313",
   },
   container: {
-    width: "670px",
-    height: "600px",
+    width: "690px",
+    height: "650px",
     margin: "auto",
     fontFamily: "Arial, sans-serif",
     position: "relative",
