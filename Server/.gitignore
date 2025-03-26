@@ -1,2 +1,10 @@
+<<<<<<< HEAD
 /venv
 .zshrc
+=======
+venv/
+.zshrc
+.env
+__pycache__/
+
+>>>>>>> ff64a39cbdd46dd888bbf6cb773ee7d79030720a

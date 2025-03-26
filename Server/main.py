@@ -13,9 +13,9 @@ from database.models import Base
 from database.conn import engine
 
 app = FastAPI()
-app.include_router(chats.router)
-app.include_router(check_database.router)
-app.include_router(auth.router)
+app.include_router(chats.router, prefix="/api/conversation", tags=["chats"])
+app.include_router(check_database.router, prefix="/api/data", tags=["database"])
+app.include_router(auth.router, prefix="/api/user", tags=["auth"])
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,7 +1,7 @@
 import csv
 import io
 from sqlalchemy.orm import Session
-from database.models import Employee, HRUser, Conversation, Message
+from database.models import Master, HRUser, Conversation, Message, ActivityTracker, Leave, Onboarding, Performance, Rewards, Vibemeter
 import json
 
 def parse_bool(value: str) -> bool:
@@ -33,15 +33,16 @@ def parse_shap_values(value: str):
 def ingest_csv_data(file_content: bytes, table: str, db: Session):
     """
     Reads CSV data from the given bytes and ingests records into the specified table.
-    Supported tables: 'employee', 'hr', 'conversation', 'message'
+    Supported tables: 'master', 'hr', 'conversation', 'message', 'activity_tracker', 'leave', 'onboarding', 'performance', 'rewards', 'vibemeter'
     """
     decoded = file_content.decode("utf-8")
     reader = csv.DictReader(io.StringIO(decoded))
     records = []
     table = table.lower()
 
-    if table == "employee":
+    if table == "master":
         for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
             employee_id = row.get("employee_id")
             if not employee_id:
                 raise ValueError("Missing employee_id")
@@ -50,32 +51,34 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
             shap_str = row.get("shap_values", "")
             shap_list = parse_shap_values(shap_str)
 
-            employee = Employee(
+            employee = Master(
                 employee_id=row.get("employee_id"),
                 shap_values=shap_list,
                 # employee_name=row.get("employee_name", ""),
                 # employee_email=row.get("employee_email"),
                 # password=hash_password(row.get("password")),
+                feature_vector= row.get("feature_vector", []),
                 # role=row.get("role", "employee"),
                 # report=row.get("report", ""),
                 sentimental_score=parse_int(row.get("sentimental_score", "0")),
                 # is_resolved=parse_bool(row.get("is_resolved", "false")),
 
-                work_hours=parse_float(row.get("work_hours", "0.0")),
-                leave_days=parse_int(row.get("leave_days", "0")),
-                leave_type=row.get("leave_type", ""),
-                performance_rating=parse_int(row.get("performance_rating", "0")),
-                manager_feedback=row.get("manager_feedback", ""),
-                promotion_consideration=parse_bool(row.get("promotion_consideration", "false")),
-                reward_points=parse_int(row.get("reward_points", "0")),
-                award_type=row.get("award_type", ""),
-                team_messages_sent=parse_int(row.get("team_messages_sent", "0")),
-                vibe_score=parse_int(row.get("vibe_score", "0"))
+                # work_hours=parse_float(row.get("work_hours", "0.0")),
+                # leave_days=parse_int(row.get("leave_days", "0")),
+                # leave_type=row.get("leave_type", ""),
+                # performance_rating=parse_int(row.get("performance_rating", "0")),
+                # manager_feedback=row.get("manager_feedback", ""),
+                # promotion_consideration=parse_bool(row.get("promotion_consideration", "false")),
+                # reward_points=parse_int(row.get("reward_points", "0")),
+                # award_type=row.get("award_type", ""),
+                # team_messages_sent=parse_int(row.get("team_messages_sent", "0")),
+                # vibe_score=parse_int(row.get("vibe_score", "0"))
             )
             db.add(employee)
             records.append(employee)
     elif table == "hr":
         for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
             hr_user = HRUser(
                 email=row.get("email"),
                 # password=hash_password(row.get("password")),
@@ -85,6 +88,7 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
             records.append(hr_user)
     elif table == "conversation":
         for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
             try:
                 messages_arr = json.loads(row.get("messages", "[]"))
             except Exception:
@@ -98,6 +102,7 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
             records.append(conversation)
     elif table == "message":
         for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
             message = Message(
                 id=int(row.get("message_id")),  # assuming message_id is provided as integer
                 conv_id=int(row.get("conv_id")),
@@ -105,12 +110,128 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
             )
             db.add(message)
             records.append(message)
+    elif table == "activity_tracker":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            activity = ActivityTracker(
+                employee_id=row.get("employee_id"),
+                date=row.get("date"),
+                teams_messages_sent = row.get("teams_messages_sent"),
+                emails_sent = row.get("emails_sent"),
+                work_hours = row.get("work_hours"),
+                meetings_attended = row.get("meetings_attended")
+            )
+            db.add(activity)
+            records.append(activity)
+    elif table == "leave":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            leave = Leave(
+                employee_id=row.get("employee_id"),
+                leave_type=row.get("leave_type", ""),
+                leave_start_date=row.get("leave_start_date", ""),
+                leave_end_date=row.get("leave_end_date", ""),
+                leave_days=parse_int(row.get("leave_days", "0"))
+            )
+            db.add(leave)
+            records.append(leave)
+    elif table == "onboarding":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            onboarding = Onboarding(
+                employee_id=row.get("employee_id"),
+                joining_date=row.get("joining_date"),
+                onboarding_feedback=row.get("onboarding_feedback", ""),
+                mentor_assigned = parse_bool(row.get("mentor_assigned")),
+                initial_training_completed=parse_bool(row.get("initial_training_completed"))
+            )
+            db.add(onboarding)
+            records.append(onboarding)
+    elif table == "performance":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            performance = Performance(
+                employee_id=row.get("employee_id"),
+                review_period=row.get("review_period"),
+                performance_rating=parse_int(row.get("performance_rating", "0")),
+                manager_feedback=row.get("manager_feedback", ""),
+                promotion_consideration = parse_bool(row.get("promotion_consideration"))
+            )
+            db.add(performance)
+            records.append(performance)
+    elif table == "rewards":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            rewards = Rewards(
+                employee_id=row.get("employee_id"),
+                award_date=row.get("award_date"),
+                award_type=row.get("award_type", ""),
+                reward_points=parse_int(row.get("reward_points", "0")),
+            )
+            db.add(rewards)
+            records.append(rewards)
+    elif table == "vibemeter":
+        for row in reader:
+            row = {key.lower(): value for key, value in row.items()}
+            vibemeter = Vibemeter(
+                employee_id=row.get("employee_id"),
+                response_date=row.get("response_date"),
+                emotion_zone=row.get("emotion_zone", ""),
+                vibe_score=row.get("vibe_score")
+            )
+            db.add(vibemeter)
+            records.append(vibemeter)
     else:
         raise ValueError("Invalid table specified for ingestion.")
     
     db.commit()
     return len(records)
 
+
+def update_master_feature_vector(db: Session):
+    """
+    For every unique employee_id found in the six datasets, update the Master table.
+    The feature_vector field in Master is updated to include the table names (features)
+    where that employee appears.
+    """
+    # List of tuples (table_feature_name, ModelClass)
+    tables_to_check = [
+        ("activity_tracker", ActivityTracker),
+        ("leave", Leave),
+        ("onboarding", Onboarding),
+        ("performance", Performance),
+        ("rewards", Rewards),
+        ("vibemeter", Vibemeter)
+    ]
+    
+    # Dictionary to collect employee_id and associated features (table names)
+    employee_features = {}
+    for feature_name, model in tables_to_check:
+        results = db.query(model.employee_id).distinct().all()
+        for (emp_id,) in results:
+            if not emp_id:
+                continue
+            if emp_id not in employee_features:
+                employee_features[emp_id] = set()
+            employee_features[emp_id].add(feature_name)
+    
+    # Update or create records in Master table
+    for emp_id, features in employee_features.items():
+        master_record = db.query(Master).filter(Master.employee_id == emp_id).first()
+        if master_record:
+            # Update the feature_vector by unioning existing features with new ones
+            existing_features = set(master_record.feature_vector) if master_record.feature_vector else set()
+            updated_features = existing_features.union(features)
+            master_record.feature_vector = list(updated_features)
+        else:
+            # Create new Master record with defaults and the feature_vector
+            new_master = Master(
+                employee_id=emp_id,
+                feature_vector=list(features)
+            )
+            db.add(new_master)
+    
+    db.commit()
 
 # import psycopg2
 # import csv
@@ -181,4 +302,3 @@ def ingest_csv_data(file_content: bytes, table: str, db: Session):
 #     cursor.close()
 #     conn.close()
 #     print("🔌 PostgreSQL connection closed")
-

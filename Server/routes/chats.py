@@ -19,10 +19,7 @@ load_dotenv()
 API_KEY = os.getenv("GENAI_API_KEY")
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-router = APIRouter(
-    prefix="/chats",       # Base route prefix
-    tags=["chats"]          # Tags for Swagger documentation
-)
+router = APIRouter()
 
 class StartConversationRequest(BaseModel):
     employee_name: str
