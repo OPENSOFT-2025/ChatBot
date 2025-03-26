@@ -35,6 +35,7 @@ class MessageRequest(BaseModel):
     message: str
     conversation_id:int
     selected_questions:List[str]
+    already_asked:List[str]
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -100,15 +101,19 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         questions = request.selected_questions
         if not questions:
             raise HTTPException(status_code=404, detail="No pre-selected questions found")
+        
+        already_asked=request.already_asked
+        already_asked_text = "\n".join([f"- {q}" for q in already_asked])
 
-        # ✅ 4. Construct the AI prompt
+        # Construct the AI prompt
         question_text = "\n".join([f"- {q}" for q in questions])
+
+
         # Generate AI's response
         ai_prompt = (
-            f"You are having a conversation with {request.employee_name}. "
-            f"Here are the pre-selected questions:\n\n"
-            f"{question_text}\n\n"
-            f"Based on the employee's message, ask follow-up questions relevant to these topics."
+            f"The employee's response is : {request.message}.Based on this response ask any one follow-up question strictly from the question bank provided below and this question should not be present or related to the list of previously asked questions provided below.Your response should have one line only."
+            f"List of previously asked questions: {already_asked} \n"
+            f"Question bank: {question_text} \n"
         )
 
         generated_message = generate_text(request.message)
@@ -127,9 +132,13 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         conversation.message_ids.append(chatbot_message.id)
         db.commit()
 
+        # Append the new question and update the list
+        already_asked.append(generated_message)
         return {
+            "ai_prompt":ai_prompt,
             "chatbot_response": generated_message,
-            "conversation_id": conversation.id
+            "conversation_id": conversation.id,
+            "already_asked":already_asked
         }
 
     except Exception as e:
