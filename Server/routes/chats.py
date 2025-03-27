@@ -10,7 +10,7 @@ from gemini import generate_text
 from database.conn import get_db
 from typing import List, Dict
 from datetime import datetime
-from openai import chat_with_gpt4o
+from chatgpt import chat_with_gpt4o
 
 from database.models import Conversation,Message
 
@@ -42,7 +42,7 @@ class PromptRequest(BaseModel):
 @router.post("/start")
 async def start_conversation(request: StartConversationRequest, db: Session = Depends(get_db)):
     greeting_prompt = f"Generate a greeting message for {request.employee_name} and ask his/her vibe of today."
-    greeting_message = generate_text(greeting_prompt)
+    greeting_message = chat_with_gpt4o(greeting_prompt)
     gemini_message = Message(
         content=greeting_message,
         sender_type="chatbot"
@@ -116,10 +116,10 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
     f"- **Your response must be in a single sentence only.** "
     f"- **Do not include explanations, lists, or multiple questions.** "
     f"- **Do not repeat any questions from the list of previously asked questions.**\n\n"
-    f"List of previously asked questions: {already_asked}\n"
+    f"List of previously asked questions: {already_asked_text}\n"
     f"Question bank:\n{question_text}\n"        )
 
-        generated_message = generate_text(request.message)
+        generated_message = chat_with_gpt4o(request.message)
 
         # Store the AI response in `Message` table
         chatbot_message = Message(
