@@ -60,10 +60,13 @@ async def start_conversation(request: StartConversationRequest, db: Session = De
     if not selected_questions:
         raise HTTPException(status_code=400, detail="No valid questions found for the given SHAP topics")
     
+    now = datetime.now()
     new_conversation = Conversation(
         employee_id=request.employee_id,
         employee_name=request.employee_name,
-        message_ids=[gemini_message.id]  # Store the message ID
+        message_ids=[gemini_message.id],  # Store the message ID
+        date=now.date(),
+        time=now.time()
     )
     db.add(new_conversation)
     db.commit()
@@ -144,6 +147,87 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@router.get("/history/employee/{employee_id}")
+def get_conversation_history(employee_id: str,db:Session = Depends(get_db)):
+    try:
+        conversations = db.query(Conversation).filter(Conversation.employee_id == employee_id).all()
+        if not conversations:
+            raise HTTPException(status_code=404, detail="No conversations found for this employee ID")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetcging the conversations: {str(e)}")
+    # Return the conversations
+    return {"conversations": conversations}
+
+
+@router.get("/history/{conversation_id}")
+def get_messages(conversation_id: int, db: Session = Depends(get_db)):  # Ensure ID is int if it's an integer column
+    try:
+        # Fetch the conversation by ID
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Fetch associated messages by their IDs
+        messages = db.query(Message).filter(Message.id.in_(conversation.message_ids)).all()
+
+        # Format the response
+        message_list = [{"id": msg.id, "content": msg.content, "sender_type": msg.sender_type} for msg in messages]
+
+        return message_list
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/insights/{conversation_id}")
+def get_insights(conversation_id: int, db: Session = Depends(get_db)):
+    """
+    Generate insights based on the entire conversation using Gemini.
+    """
+    try:
+        # 1. Fetch the conversation by ID
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # 2. Fetch all messages associated with this conversation
+        messages = db.query(Message).filter(Message.id.in_(conversation.message_ids)).all()
+
+        if not messages:
+            raise HTTPException(status_code=404, detail="No messages found for this conversation")
+
+        # 3. Compile the conversation history
+        conversation_history = ""
+        for msg in messages:
+            role = "Employee" if msg.sender_type == "employee" else "Chatbot"
+            conversation_history += f"{role}: {msg.content}\n"
+
+        # 4. Create an insightful prompt for Gemini
+        insight_prompt = (
+            f"Here is a conversation between the employee ({conversation.employee_name}) and a chatbot:\n\n"
+            f"{conversation_history}\n\n"
+            f"Generate detailed insights based on this conversation:\n"
+            f"- Identify the employee's mood, concerns, and sentiments.\n"
+            f"- Highlight key issues or recurring themes.\n"
+            f"- Provide suggestions or recommendations to improve the situation.\n"
+            f"- Format the insights in a clear and organized manner."
+        )
+
+        # 5. Generate insights using Gemini
+        insights = generate_text(insight_prompt)
+
+        # 6. Return the insights
+        return {
+            "conversation_id": conversation.id,
+            "employee_id": conversation.employee_id,
+            "employee_name": conversation.employee_name,
+            "insights": insights
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating insights: {str(e)}")
 
 @router.post("/test")
 def generate(request: PromptRequest):

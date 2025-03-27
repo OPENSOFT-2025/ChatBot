@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from database.conn import get_db
 from csv_ingest import ingest_csv_data, update_master_feature_vector
-from database.models import Master
+from database.models import Master,Conversation,Message
 
 # Create a router instance
 router = APIRouter()
@@ -42,6 +42,8 @@ def update_master(db: Session = Depends(get_db)):
         return {"message": "Master table updated successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating master table: {str(e)}")
+
+
 
 
 

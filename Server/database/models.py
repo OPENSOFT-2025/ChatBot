@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, Text, JSON, Float
+from sqlalchemy import Column, Integer, String, Boolean, Text, JSON, Float,Date, Time
 from sqlalchemy.ext.mutable import MutableList, MutableDict
 
 Base = declarative_base()
@@ -47,6 +47,8 @@ class Conversation(Base):
     employee_id = Column(String, nullable=False)         # Reference to Employee.id.
     employee_name = Column(String, nullable=False)
     message_ids = Column(MutableList.as_mutable(JSON), default=[])  # List of message IDs.
+    date = Column(Date, nullable=True)                 # Date of conversation
+    time = Column(Time, nullable=True)                 # Time of conversation
 
 
 class Message(Base):
