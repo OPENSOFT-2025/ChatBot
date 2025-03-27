@@ -142,7 +142,7 @@ function NavItem({ icon: Icon, label, active, collapsed, onClick }: NavItemProps
     <Button
       variant="ghost"
       className={cn(
-        "w-full justify-start gap-2 my-3 transition-all duration-200",
+        "w-full justify-start gap-2 my-1 transition-all duration-200", // Changed from my-3 to my-1
         collapsed ? "justify-center p-2" : "px-3 py-2",
         active 
           ? "bg-[#26890d] text-black" 
