@@ -33,7 +33,8 @@ class MessageRequest(BaseModel):
     message: str
     conversation_id:int
     selected_questions:List[str]
-    already_asked:List[str]
+    chat_history:List[Dict[str, str]]
+
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -97,29 +98,36 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(employee_message)
 
+        # Retrieve the chat-history
+        chat_history  = request.chat_history
+        chat_history_text = "\n".join([
+            f"{msg['sender_type'].capitalize()}: {msg['message']}"
+            for msg in chat_history
+        ])
+
         # Retrieve the pre-selected questions
         questions = request.selected_questions
         if not questions:
             raise HTTPException(status_code=404, detail="No pre-selected questions found")
-        
-        already_asked=request.already_asked
-        already_asked_text = "\n".join([f"- {q}" for q in already_asked])
-
-        # Construct the AI prompt
         question_text = "\n".join([f"- {q}" for q in questions])
 
 
         # Generate AI's response
-        ai_prompt = (
-    f"The employee's response is: {request.message}. "
-    f"Based on this response, ask **ONLY ONE follow-up question** strictly from the question bank provided below. "
-    f"- **Your response must be in a single sentence only.** "
-    f"- **Do not include explanations, lists, or multiple questions.** "
-    f"- **Do not repeat any questions from the list of previously asked questions.**\n\n"
-    f"List of previously asked questions: {already_asked_text}\n"
-    f"Question bank:\n{question_text}\n"        )
+        ai_prompt = f"""
+The employee's response is: {request.message} 
 
-        generated_message = chat_with_gpt4o(request.message)
+- Based on this response, provide suggestionas and ask **ONLY ONE follow-up question** strictly from the question bank provided below.
+- **Your response MUST be few sentences.**
+- **You are provided with your chat history with the employee**
+- **Understand the context of conversation from the chat history and you can tweak accordingly, the next question from the question bank.**
+- **STRICTLY follow the provided format**.
+
+### Your Chat History: {chat_history_text}
+
+### Question bank:
+{question_text}
+"""
+        generated_message = chat_with_gpt4o(ai_prompt)
 
         # Store the AI response in `Message` table
         chatbot_message = Message(
@@ -135,13 +143,21 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         conversation.message_ids.append(chatbot_message.id)
         db.commit()
 
-        # Append the new question and update the list
-        already_asked.append(generated_message)
+        # Append current employee message to the chat history
+        chat_history.append({
+            "sender_type": "employee",
+            "message": request.message
+        })
+        # Append chatbot message to the chat history
+        chat_history.append({
+            "sender_type": "chatbot",
+            "message": generated_message
+        })        
         return {
             "ai_prompt":ai_prompt,
             "chatbot_response": generated_message,
             "conversation_id": conversation.id,
-            "already_asked":already_asked
+            "chat_history":chat_history
         }
 
     except Exception as e:

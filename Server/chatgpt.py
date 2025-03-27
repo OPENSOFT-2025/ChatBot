@@ -15,14 +15,14 @@ def chat_with_gpt4o(prompt):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "You are an empathetic, supportive, and proactive digital HR assistant dedicated to improving employee well-being and engagement."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=1000,
             temperature=0.7
         )
 
-        # ✅ Access the response using dot notation
+        # Access the response using dot notation
         if response.choices and len(response.choices) > 0:
             return response.choices[0].message.content.strip()
         else:
