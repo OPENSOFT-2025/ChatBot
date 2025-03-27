@@ -10,6 +10,7 @@ from gemini import generate_text
 from database.conn import get_db
 from typing import List, Dict
 from datetime import datetime
+from chatgpt import chat_with_gpt4o
 
 from database.models import Conversation,Message
 
@@ -18,10 +19,7 @@ load_dotenv()
 API_KEY = os.getenv("GENAI_API_KEY")
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-router = APIRouter(
-    prefix="/chats",       # Base route prefix
-    tags=["chats"]          # Tags for Swagger documentation
-)
+router = APIRouter()
 
 class StartConversationRequest(BaseModel):
     employee_name: str
@@ -35,6 +33,8 @@ class MessageRequest(BaseModel):
     message: str
     conversation_id:int
     selected_questions:List[str]
+    chat_history:List[Dict[str, str]]
+
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -43,8 +43,7 @@ class PromptRequest(BaseModel):
 @router.post("/start")
 async def start_conversation(request: StartConversationRequest, db: Session = Depends(get_db)):
     greeting_prompt = f"Generate a greeting message for {request.employee_name} and ask his/her vibe of today."
-    greeting_message = generate_text(greeting_prompt)
-
+    greeting_message = chat_with_gpt4o(greeting_prompt)
     gemini_message = Message(
         content=greeting_message,
         sender_type="chatbot"
@@ -62,10 +61,13 @@ async def start_conversation(request: StartConversationRequest, db: Session = De
     if not selected_questions:
         raise HTTPException(status_code=400, detail="No valid questions found for the given SHAP topics")
     
+    now = datetime.now()
     new_conversation = Conversation(
         employee_id=request.employee_id,
         employee_name=request.employee_name,
-        message_ids=[gemini_message.id]  # Store the message ID
+        message_ids=[gemini_message.id],  # Store the message ID
+        date=now.date(),
+        time=now.time()
     )
     db.add(new_conversation)
     db.commit()
@@ -96,22 +98,36 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(employee_message)
 
+        # Retrieve the chat-history
+        chat_history  = request.chat_history
+        chat_history_text = "\n".join([
+            f"{msg['sender_type'].capitalize()}: {msg['message']}"
+            for msg in chat_history
+        ])
+
         # Retrieve the pre-selected questions
         questions = request.selected_questions
         if not questions:
             raise HTTPException(status_code=404, detail="No pre-selected questions found")
-
-        # ✅ 4. Construct the AI prompt
         question_text = "\n".join([f"- {q}" for q in questions])
-        # Generate AI's response
-        ai_prompt = (
-            f"You are having a conversation with {request.employee_name}. "
-            f"Here are the pre-selected questions:\n\n"
-            f"{question_text}\n\n"
-            f"Based on the employee's message, ask follow-up questions relevant to these topics."
-        )
 
-        generated_message = generate_text(request.message)
+
+        # Generate AI's response
+        ai_prompt = f"""
+The employee's response is: {request.message} 
+
+- Based on this response, provide suggestionas and ask **ONLY ONE follow-up question** strictly from the question bank provided below.
+- **Your response MUST be few sentences.**
+- **You are provided with your chat history with the employee**
+- **Understand the context of conversation from the chat history and you can tweak accordingly, the next question from the question bank.**
+- **STRICTLY follow the provided format**.
+
+### Your Chat History: {chat_history_text}
+
+### Question bank:
+{question_text}
+"""
+        generated_message = chat_with_gpt4o(ai_prompt)
 
         # Store the AI response in `Message` table
         chatbot_message = Message(
@@ -127,14 +143,107 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
         conversation.message_ids.append(chatbot_message.id)
         db.commit()
 
+        # Append current employee message to the chat history
+        chat_history.append({
+            "sender_type": "employee",
+            "message": request.message
+        })
+        # Append chatbot message to the chat history
+        chat_history.append({
+            "sender_type": "chatbot",
+            "message": generated_message
+        })        
         return {
+            "ai_prompt":ai_prompt,
             "chatbot_response": generated_message,
-            "conversation_id": conversation.id
+            "conversation_id": conversation.id,
+            "chat_history":chat_history
         }
 
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@router.get("/history/employee/{employee_id}")
+def get_conversation_history(employee_id: str,db:Session = Depends(get_db)):
+    try:
+        conversations = db.query(Conversation).filter(Conversation.employee_id == employee_id).all()
+        if not conversations:
+            raise HTTPException(status_code=404, detail="No conversations found for this employee ID")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetcging the conversations: {str(e)}")
+    # Return the conversations
+    return {"conversations": conversations}
+
+
+@router.get("/history/{conversation_id}")
+def get_messages(conversation_id: int, db: Session = Depends(get_db)):  # Ensure ID is int if it's an integer column
+    try:
+        # Fetch the conversation by ID
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Fetch associated messages by their IDs
+        messages = db.query(Message).filter(Message.id.in_(conversation.message_ids)).all()
+
+        # Format the response
+        message_list = [{"id": msg.id, "content": msg.content, "sender_type": msg.sender_type} for msg in messages]
+
+        return message_list
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/insights/{conversation_id}")
+def get_insights(conversation_id: int, db: Session = Depends(get_db)):
+    """
+    Generate insights based on the entire conversation using Gemini.
+    """
+    try:
+        # 1. Fetch the conversation by ID
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # 2. Fetch all messages associated with this conversation
+        messages = db.query(Message).filter(Message.id.in_(conversation.message_ids)).all()
+
+        if not messages:
+            raise HTTPException(status_code=404, detail="No messages found for this conversation")
+
+        # 3. Compile the conversation history
+        conversation_history = ""
+        for msg in messages:
+            role = "Employee" if msg.sender_type == "employee" else "Chatbot"
+            conversation_history += f"{role}: {msg.content}\n"
+
+        # 4. Create an insightful prompt for Gemini
+        insight_prompt = (
+            f"Here is a conversation between the employee ({conversation.employee_name}) and a chatbot:\n\n"
+            f"{conversation_history}\n\n"
+            f"Generate detailed insights based on this conversation:\n"
+            f"- Identify the employee's mood, concerns, and sentiments.\n"
+            f"- Highlight key issues or recurring themes.\n"
+            f"- Provide suggestions or recommendations to improve the situation.\n"
+            f"- Format the insights in a clear and organized manner."
+        )
+
+        # 5. Generate insights using Gemini
+        insights = generate_text(insight_prompt)
+
+        # 6. Return the insights
+        return {
+            "conversation_id": conversation.id,
+            "employee_id": conversation.employee_id,
+            "employee_name": conversation.employee_name,
+            "insights": insights
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating insights: {str(e)}")
 
 @router.post("/test")
 def generate(request: PromptRequest):
