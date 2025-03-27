@@ -230,7 +230,6 @@ def get_insights(conversation_id: int, db: Session = Depends(get_db)):
             f"- Provide suggestions or recommendations to improve the situation.\n"
             f"- Format the insights in a clear and organized manner."
         )
-
         # 5. Generate insights using Gemini
         insights = generate_text(insight_prompt)
 
