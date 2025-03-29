@@ -220,7 +220,7 @@ def get_insights(conversation_id: int, db: Session = Depends(get_db)):
             role = "Employee" if msg.sender_type == "employee" else "Chatbot"
             conversation_history += f"{role}: {msg.content}\n"
 
-        # 4. Create an insightful prompt for Gemini
+        # 4. Create an insightful prompt for openai
         insight_prompt = (
             f"Here is a conversation between the employee ({conversation.employee_name}) and a chatbot:\n\n"
             f"{conversation_history}\n\n"
@@ -231,7 +231,7 @@ def get_insights(conversation_id: int, db: Session = Depends(get_db)):
             f"- Format the insights in a clear and organized manner."
         )
         # 5. Generate insights using Gemini
-        insights = generate_text(insight_prompt)
+        insights = chat_with_gpt4o(insight_prompt)
 
         # 6. Return the insights
         return {
