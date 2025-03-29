@@ -53,7 +53,9 @@
     <div class="section">
         <h2>Sentiment Analysis</h2>
         <p><strong>Overall Sentiment:</strong> {{ report_data.sentiment }}</p>
+        <p>{{ report_data.severity_score }} / 100</p>
         <p>{{ report_data.sentiment_commentary }}</p>
+        <p>HR action recommended: {{ report_data.escalate }}</p>
     </div>
 
     <div class="section">

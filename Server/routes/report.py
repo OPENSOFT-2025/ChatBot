@@ -11,16 +11,47 @@ from pydantic import BaseModel
 from typing import Dict
 from database.conn import get_db
 from database.models import Conversation, Message
+from transformers import pipeline
 
 router = APIRouter()
 
-# Pydantic model for request payload with employee_id
+# Initialize DistilBERT emotion classifier with bhadresh-savani model
+emotion_classifier = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion", top_k=None)
+
 class ReportRequest(BaseModel):
     conversation_id: int
-    employee_id: str  # Added employee_id field
-    shap_values: Dict[str, float]  # SHAP values as a dict of feature: contribution pairs
+    employee_id: str
+    shap_values: Dict[str, float]
 
-@router.post("/report")
+def analyze_emotions(messages):
+    """
+    Analyze emotions in employee messages and return a severity score (0-100) and escalation flag.
+    """
+    employee_messages = [msg.content for msg in messages if msg.sender_type.lower() != "assistant"]
+    if not employee_messages:
+        return 50, False  # Default to neutral
+    
+    # Analyze emotions for each message
+    total_sadness = 0
+    total_anger = 0
+    for msg in employee_messages:
+        emotions = emotion_classifier(msg)[0]  # List of dicts with label and score
+        sadness = next((e["score"] for e in emotions if e["label"] == "sadness"), 0)
+        anger = next((e["score"] for e in emotions if e["label"] == "anger"), 0)
+        total_sadness += sadness
+        total_anger += anger
+    
+    # Average scores
+    avg_sadness = total_sadness / len(employee_messages)
+    avg_anger = total_anger / len(employee_messages)
+    
+    # Severity score: max of sadness or anger, scaled to 0-100
+    severity_score = max(avg_sadness, avg_anger) * 100
+    escalate = severity_score > 75  # Threshold for HR escalation
+    
+    return severity_score, escalate
+
+@router.post("/employee")
 def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
     # Retrieve conversation record by conversation_id
     conversation = db.query(Conversation).filter(Conversation.id == request.conversation_id).first()
@@ -36,30 +67,52 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
     
     # Build conversation history
     conversation_history = [
-        {"role": "Chatbot" if msg.sender_type.lower() == "assistant" else "Employee", "content": msg.content}
+        {"role": "Chatbot" if msg.sender_type.lower() == "chatbot" else "Employee", "content": msg.content}
         for msg in messages
     ]
     
+    # Perform emotion analysis
+    severity_score, escalate = analyze_emotions(messages)
+    
+    # Determine sentiment label and commentary
+    if severity_score <= 25:
+        sentiment = "Positive"
+        sentiment_commentary = "The employee appears happy and engaged."
+    elif severity_score <= 50:
+        sentiment = "Neutral"
+        sentiment_commentary = "The employee’s responses indicate a balanced mood."
+    elif severity_score <= 75:
+        sentiment = "Negative"
+        sentiment_commentary = "The employee shows signs of sadness or frustration."
+    else:
+        sentiment = "Severe"
+        sentiment_commentary = "The employee exhibits strong signs of sadness or anger. HR action recommended."
+
     # Use SHAP values and employee_id from the request
     shap_dict = request.shap_values
 
     # Prepare report data
     report_data = {
-        "logo_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg",  # Replace with your company logo URL
-        "employee_name": conversation.employee_name,  # Still fetched from DB
-        "employee_id": request.employee_id,  # Use employee_id from request instead of DB
+        "logo_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg",
+        "employee_name": conversation.employee_name,
+        "employee_id": request.employee_id,
         "date": conversation.date.strftime("%Y-%m-%d") if conversation.date else datetime.now().strftime("%Y-%m-%d"),
         "time": conversation.time.strftime("%H:%M:%S") if conversation.time else datetime.now().strftime("%H:%M:%S"),
         "executive_summary": (
             "This report summarizes the employee’s conversation with the chatbot, highlighting key factors "
-            "affecting their well-being based on provided SHAP values and sentiment analysis."
+            "affecting their well-being based on provided SHAP values and emotion analysis."
         ),
         "conversation_history": conversation_history,
-        "shap_values": shap_dict,  # From request
-        "sentiment": "Neutral",  # Replace with actual sentiment analysis if added later
-        "sentiment_commentary": "The employee’s responses indicate a balanced mood with areas for exploration.",
+        "shap_values": shap_dict,
+        "sentiment": sentiment,
+        "severity_score": round(severity_score, 2),
+        "sentiment_commentary": sentiment_commentary,
+        "escalate": escalate,
         "detailed_insights": (
-            "Recommendations: Schedule a follow-up to address potential concerns identified in the conversation."
+            "Recommendations: " + (
+                "Immediate HR intervention required due to severe emotional state." if escalate else
+                "Monitor employee well-being and consider follow-up discussions."
+            )
         )
     }
     
@@ -78,6 +131,7 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
     pdf_bytes = pdf_file.getvalue()
     pdf_file.close()
     
+    # Set headers for PDF download
     filename = f"report_{request.employee_id}_{request.conversation_id}.pdf"
     headers = {
         "Content-Disposition": f"attachment; filename={filename}"
