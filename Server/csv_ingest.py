@@ -233,6 +233,58 @@ def update_master_feature_vector(db: Session):
     
     db.commit()
 
+
+def ingest_shap_values(file_content: bytes, db: Session):
+    """
+    Ingests SHAP values and updates the Master table by employee_id.
+    Uses csv.DictReader instead of pandas.
+    """
+    try:
+        # 1. Decode the CSV content
+        decoded = file_content.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(decoded))
+
+        # 2. Validate required columns
+        required_columns = {"employee_id", "shap_values", "is_selected"}
+        if not required_columns.issubset(reader.fieldnames):
+            missing_cols = required_columns - set(reader.fieldnames)
+            raise ValueError(f"Missing required columns: {missing_cols}")
+
+        updated_count = 0
+
+        for row in reader:
+            employee_id = row["employee_id"]
+            
+            # Extract SHAP values
+            shap_str = row["shap_values"]  # e.g., "Average_Vibe_Score(0.0323), Total_Reward_Points(0.0290), ..."
+            
+            # Parse and extract SHAP names without scores
+            shap_values = [item.split('(')[0].strip() for item in shap_str.split(',')]
+            
+            # Take only the top 6 SHAP values
+            shap_values = shap_values[:6]
+
+            # Convert `is_selected` to boolean
+            is_selected = row["is_selected"].lower() == "true"
+
+            # 4. Query the existing record by employee_id
+            master_record = db.query(Master).filter(Master.employee_id == employee_id).first()
+
+            if master_record:
+                # 5. Update existing record
+                master_record.shap_values = shap_values
+                master_record.is_selected = is_selected
+                updated_count += 1
+            else:
+                print(f"Employee ID {employee_id} not found. Skipping...")
+
+        # 6. Commit all changes
+        db.commit()
+        return updated_count
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"Error ingesting SHAP values: {str(e)}")
+
 # import psycopg2
 # import csv
 

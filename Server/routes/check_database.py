@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from database.conn import get_db
-from csv_ingest import ingest_csv_data, update_master_feature_vector
+from csv_ingest import ingest_csv_data, update_master_feature_vector,ingest_shap_values
 from database.models import Master,Conversation,Message
 
 # Create a router instance
@@ -43,8 +43,21 @@ def update_master(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating master table: {str(e)}")
 
-
-
+# Route to update the shap values of master table
+@router.post("/update_master_shap")
+async def ingest_data(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # Check if the file extension is .csv (ignoring case)
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Please upload a CSV file.")
+    try:
+        file_content = await file.read()
+        count = ingest_shap_values(file_content, db)
+        return {"message": f"Ingested {count} records into master table successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}")
 
 
 @router.get("/employees")
