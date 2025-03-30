@@ -12,6 +12,7 @@ from typing import Dict
 from database.conn import get_db
 from database.models import Conversation, Message
 from transformers import pipeline
+from aws_uploader import upload_pdf_to_s3
 
 router = APIRouter()
 
@@ -53,43 +54,44 @@ def analyze_emotions(messages):
 
 @router.post("/employee")
 def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
-    # Retrieve conversation record by conversation_id
+    """
+    Generate a PDF report from the conversation and upload it to AWS S3.
+    Returns the public S3 URL of the PDF.
+    """
+    # Fetch conversation record
     conversation = db.query(Conversation).filter(Conversation.id == request.conversation_id).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
     if not conversation.message_ids:
         raise HTTPException(status_code=404, detail="No messages found for this conversation")
-    
-    # Retrieve and sort messages
+
+    # Fetch and sort messages
     messages = db.query(Message).filter(Message.id.in_(conversation.message_ids)).all()
     messages.sort(key=lambda m: m.id)
-    
+
     # Build conversation history
     conversation_history = [
         {"role": "Chatbot" if msg.sender_type.lower() == "chatbot" else "Employee", "content": msg.content}
         for msg in messages
     ]
-    
-    # Perform emotion analysis
-    severity_score, escalate = analyze_emotions(messages)
-    
-    # Determine sentiment label and commentary
-    if severity_score <= 25:
-        sentiment = "Positive"
-        sentiment_commentary = "The employee appears happy and engaged."
-    elif severity_score <= 50:
-        sentiment = "Neutral"
-        sentiment_commentary = "The employee’s responses indicate a balanced mood."
-    elif severity_score <= 75:
-        sentiment = "Negative"
-        sentiment_commentary = "The employee shows signs of sadness or frustration."
-    else:
-        sentiment = "Severe"
-        sentiment_commentary = "The employee exhibits strong signs of sadness or anger. HR action recommended."
 
-    # Use SHAP values and employee_id from the request
-    shap_dict = request.shap_values
+    # # Perform emotion analysis
+    # severity_score, escalate = analyze_emotions(messages)
+
+    # # Determine sentiment label and commentary
+    # if severity_score <= 25:
+    #     sentiment = "Positive"
+    #     sentiment_commentary = "The employee appears happy and engaged."
+    # elif severity_score <= 50:
+    #     sentiment = "Neutral"
+    #     sentiment_commentary = "The employee’s responses indicate a balanced mood."
+    # elif severity_score <= 75:
+    #     sentiment = "Negative"
+    #     sentiment_commentary = "The employee shows signs of sadness or frustration."
+    # else:
+    #     sentiment = "Severe"
+    #     sentiment_commentary = "The employee exhibits strong signs of sadness or anger. HR action recommended."
 
     # Prepare report data
     report_data = {
@@ -103,38 +105,39 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
             "affecting their well-being based on provided SHAP values and emotion analysis."
         ),
         "conversation_history": conversation_history,
-        "shap_values": shap_dict,
-        "sentiment": sentiment,
-        "severity_score": round(severity_score, 2),
-        "sentiment_commentary": sentiment_commentary,
-        "escalate": escalate,
-        "detailed_insights": (
-            "Recommendations: " + (
-                "Immediate HR intervention required due to severe emotional state." if escalate else
-                "Monitor employee well-being and consider follow-up discussions."
-            )
-        )
+        "shap_values": request.shap_values,
+        # "sentiment": sentiment,
+        # "severity_score": round(severity_score, 2),
+        # "sentiment_commentary": sentiment_commentary,
+        # "escalate": escalate,
+        # "detailed_insights": (
+        #     "Recommendations: " + (
+        #         "Immediate HR intervention required due to severe emotional state." if escalate else
+        #         "Monitor employee well-being and consider follow-up discussions."
+        #     )
+        # )
     }
-    
+
     # Render the HTML template using Jinja2
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template("report_template.html")
     html_content = template.render(report_data=report_data)
-    
-    # Generate PDF with xhtml2pdf
+
+    # Generate PDF with xhtml2pdf in-memory
     pdf_file = BytesIO()
     pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
-    
+
     if pisa_status.err:
         raise HTTPException(status_code=500, detail="Error generating PDF with xhtml2pdf")
-    
+
+    pdf_file.seek(0)  # Reset the buffer pointer
     pdf_bytes = pdf_file.getvalue()
-    pdf_file.close()
-    
-    # Set headers for PDF download
+
+    # S3 Upload
     filename = f"report_{request.employee_id}_{request.conversation_id}.pdf"
-    headers = {
-        "Content-Disposition": f"attachment; filename={filename}"
-    }
-    
-    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+    s3_url = upload_pdf_to_s3(pdf_bytes, filename)
+
+    # Close PDF buffer
+    pdf_file.close()
+
+    return {"message": "PDF report uploaded successfully", "pdf_url": s3_url}

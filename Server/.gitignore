@@ -5,5 +5,4 @@
 =======
 venv/
 .zshrc
-.env
 __pycache__/
