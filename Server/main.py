@@ -4,7 +4,7 @@ from typing import List, Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from routes import chats
 from sqlalchemy.orm import Session,sessionmaker
-from routes import check_database, auth # Import the user router
+from routes import check_database, auth, report # Import the user router
 import psycopg2,os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -16,6 +16,7 @@ app = FastAPI()
 app.include_router(chats.router, prefix="/api/conversation", tags=["chats"])
 app.include_router(check_database.router, prefix="/api/data", tags=["database"])
 app.include_router(auth.router, prefix="/api/user", tags=["auth"])
+app.include_router(report.router, prefix="/api/report", tags=["report"])
 
 app.add_middleware(
     CORSMiddleware,
