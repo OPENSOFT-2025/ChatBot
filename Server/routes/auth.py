@@ -52,12 +52,12 @@ class UserResponse(BaseModel):
         orm_mode = True
 
 
-@router.post("/employee/check", response_model=EmployeeCheckResponse)
-def check_employee_id(payload: EmployeeCheckRequest, db: Session = Depends(get_db)):
+@router.get("/check/{employee_id}", response_model=EmployeeCheckResponse)
+def check_employee_id(employee_id: str, db: Session = Depends(get_db)):
     """
-    1) Check if the employee_id exists in the system.
+    Check if the employee_id exists in the system.
     """
-    existing = db.query(Master).filter(Master.employee_id == payload.employee_id).first()
+    existing = db.query(Master).filter(Master.employee_id == employee_id).first()
     return {"exists": bool(existing)}
 
 @router.post("/register", response_model=UserRegister)
