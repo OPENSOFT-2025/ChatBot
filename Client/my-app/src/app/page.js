@@ -31,6 +31,7 @@ export default function Home() {
   const inputRef = useRef(null);
   const previousScrollHeightRef = useRef(0);
   const { user, googleSignIn, logOut } = UsersAuth();
+  const [hamburgerState, sethamburgerState] = useState(true);
   const handleSignIn = async () => {
     try {
       await googleSignIn();
@@ -258,10 +259,15 @@ export default function Home() {
   const handleMicClick = () => {
     console.log("Microphone icon clicked! Add your voice input logic here.");
   };
-
+  const handleHamburger=()=>{
+    sethamburgerState(!hamburgerState);
+  }
   return (
-    <>
-      <div className='flex gap-5 h-50 justify-center items-center bg-gray-900'>
+    <><div
+    className={`fixed z-2 top-0 right-0 w-80 h-screen bg-gray-900 transition-transform duration-500
+      ${hamburgerState ? "translate-x-full" : "translate-x-0"}
+      md:translate-x-0 md:static md:flex md:h-30 md:justify-center md:items-center md:bg-gray-700 md:w-full`}
+  >
         <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" onClick={() => setLoginOpen(true)}>Login</Button>
@@ -358,8 +364,19 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <div style={styles.pageContainer}>
+      <div className='z-5 ease-out absolute cursor-pointer top-5 right-5 rounded-sm bg-red-700  w-10 h-10 flex flex-col justify-evenly items-center md:hidden' onClick={handleHamburger}>
+        <span className={`rounded-sm absolute h-0.5 w-7 bg-white transition-transform ${
+          hamburgerState ? "top-3" : "rotate-[-45deg] "
+        }`}></span>
+        <span className={`rounded-sm absolute h-0.5 w-7 bg-white transition-opacity ${
+          hamburgerState ? "top-5" : "opacity-0"
+        }`} ></span>
+        <span className={`rounded-sm absolute h-0.5 w-7 bg-white transition-transform ${
+          hamburgerState ? "top-7" : "rotate-[45deg]"
+        }`} ></span>
+      </div>
+      
+      <div  style={styles.pageContainer}>
         <style>
           {`
                 .icon-wrapper:hover {
