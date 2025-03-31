@@ -76,22 +76,22 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
         for msg in messages
     ]
 
-    # # Perform emotion analysis
-    # severity_score, escalate = analyze_emotions(messages)
+    # Perform emotion analysis
+    severity_score, escalate = analyze_emotions(messages)
 
-    # # Determine sentiment label and commentary
-    # if severity_score <= 25:
-    #     sentiment = "Positive"
-    #     sentiment_commentary = "The employee appears happy and engaged."
-    # elif severity_score <= 50:
-    #     sentiment = "Neutral"
-    #     sentiment_commentary = "The employee’s responses indicate a balanced mood."
-    # elif severity_score <= 75:
-    #     sentiment = "Negative"
-    #     sentiment_commentary = "The employee shows signs of sadness or frustration."
-    # else:
-    #     sentiment = "Severe"
-    #     sentiment_commentary = "The employee exhibits strong signs of sadness or anger. HR action recommended."
+    # Determine sentiment label and commentary
+    if severity_score <= 25:
+        sentiment = "Positive"
+        sentiment_commentary = "The employee appears happy and engaged."
+    elif severity_score <= 50:
+        sentiment = "Neutral"
+        sentiment_commentary = "The employee’s responses indicate a balanced mood."
+    elif severity_score <= 75:
+        sentiment = "Negative"
+        sentiment_commentary = "The employee shows signs of sadness or frustration."
+    else:
+        sentiment = "Severe"
+        sentiment_commentary = "The employee exhibits strong signs of sadness or anger. HR action recommended."
 
     # Prepare report data
     report_data = {
@@ -106,16 +106,16 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
         ),
         "conversation_history": conversation_history,
         "shap_values": request.shap_values,
-        # "sentiment": sentiment,
-        # "severity_score": round(severity_score, 2),
-        # "sentiment_commentary": sentiment_commentary,
-        # "escalate": escalate,
-        # "detailed_insights": (
-        #     "Recommendations: " + (
-        #         "Immediate HR intervention required due to severe emotional state." if escalate else
-        #         "Monitor employee well-being and consider follow-up discussions."
-        #     )
-        # )
+        "sentiment": sentiment,
+        "severity_score": round(severity_score, 2),
+        "sentiment_commentary": sentiment_commentary,
+        "escalate": escalate,
+        "detailed_insights": (
+            "Recommendations: " + (
+                "Immediate HR intervention required due to severe emotional state." if escalate else
+                "Monitor employee well-being and consider follow-up discussions."
+            )
+        )
     }
 
     # Render the HTML template using Jinja2
@@ -139,5 +139,8 @@ def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
 
     # Close PDF buffer
     pdf_file.close()
+
+    conversation.report = s3_url
+    db.commit()
 
     return {"message": "PDF report uploaded successfully", "pdf_url": s3_url}

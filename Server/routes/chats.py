@@ -117,10 +117,11 @@ async def send_message(request: MessageRequest, db: Session = Depends(get_db)):
 The employee's response is: {request.message} 
 
 - Based on this response, provide suggestionas and ask **ONLY ONE follow-up question** strictly from the question bank provided below.
-- **Your response MUST be few sentences.**
+- **Your response MUST be Two sentences.**
 - **You are provided with your chat history with the employee**
 - **Understand the context of conversation from the chat history and you can tweak accordingly, the next question from the question bank.**
 - **STRICTLY follow the provided format**.
+- **After asking five-six questions, end the Conversation.
 
 ### Your Chat History: {chat_history_text}
 

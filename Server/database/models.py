@@ -49,7 +49,7 @@ class Conversation(Base):
     message_ids = Column(MutableList.as_mutable(JSON), default=[])  # List of message IDs.
     date = Column(Date, nullable=True)                 # Date of conversation
     time = Column(Time, nullable=True)                 # Time of conversation
-
+    report = Column(Text, nullable = True)
 
 class Message(Base):
     __tablename__ = "messages"

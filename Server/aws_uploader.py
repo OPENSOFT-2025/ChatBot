@@ -6,10 +6,10 @@ import boto3
 # Load AWS credentials from the .env.aws file
 load_dotenv(".env")
 
-AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_REGION = os.getenv("AWS_REGION")
-BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
+AWS_ACCESS_KEY = os.getenv("ACCESS_KEY_ID")
+AWS_SECRET_KEY = os.getenv("SECRET_ACCESS_KEY")
+AWS_REGION = os.getenv("REGION")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
 
 def upload_pdf_to_s3(pdf_bytes: bytes, pdf_filename: str) -> str:
     """
